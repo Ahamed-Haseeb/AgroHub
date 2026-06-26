@@ -26,7 +26,7 @@ function useCountUp(target, duration = 1800, start = false) {
   return value;
 }
 
-// ── Stat Card with animated number ──
+// Stat Card with animated number
 function StatCard({ stat, visible }) {
   const count = useCountUp(stat.value, 1800, visible);
   const prefix = stat.value.startsWith('₨') ? '₨ ' : '';
