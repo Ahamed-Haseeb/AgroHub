@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { platformStats } from '../data/mockData';
 
-// ── Animated counter hook ──
+// Animated 
 function useCountUp(target, duration = 1800, start = false) {
   const [value, setValue] = useState(0);
   useEffect(() => {
