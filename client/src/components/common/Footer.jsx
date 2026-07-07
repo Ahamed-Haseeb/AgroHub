@@ -93,7 +93,7 @@ export default function Footer() {
             © 2026 AgroHub (Pvt) Ltd. All rights reserved. Built for Sri Lanka 🇱🇰
           </p>
           <p style={{ color: 'var(--text-disabled)', fontSize: 'var(--text-xs)' }}>
-            Powered by <span style={{ color: 'var(--agro-green-light)' }}>import antigravity</span> · FastAPI · SARIMA · GARCH
+            Powered by <span style={{ color: 'var(--agro-green-light)' }}>SK</span> · FastAPI · SARIMA · GARCH
           </p>
         </div>
       </div>
