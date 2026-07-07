@@ -1,0 +1,14 @@
+.divider {
+  height: 1px;
+  background: var(--border);
+  border: none;
+}
+
+.text-primary { color: var(--primary); }
+.text-amber   { color: var(--amber); }
+.text-muted   { color: var(--text-muted); }
+.text-heading { color: var(--text-heading); }
+
+.fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
