@@ -1,8 +1,9 @@
-// ============================================================
-// AgroHub — Mock Data
-// Mirrors the FastAPI /api/predict-price response schema
-// and all platform entities
-// ============================================================
+import bigOnionImg from '../assets/products/big-onion.png';
+import tomatoImg from '../assets/products/tomato.png';
+import carrotImg from '../assets/products/carrot.png';
+import capsicumImg from '../assets/products/capsicum.png';
+import potatoImg from '../assets/products/potato.png';
+import leeksImg from '../assets/products/leeks.png';
 
 // --- SARIMA / GARCH Prediction (matches FastAPI schema) ---
 export const mockPrediction = {
@@ -135,6 +136,7 @@ export const cropListings = [
     icon: "🧅",
     rating: 4.8,
     orders: 24,
+    image: bigOnionImg,
   },
   {
     id: "LST002",
@@ -155,6 +157,7 @@ export const cropListings = [
     icon: "🍅",
     rating: 4.9,
     orders: 41,
+    image: tomatoImg,
   },
   {
     id: "LST003",
@@ -175,6 +178,7 @@ export const cropListings = [
     icon: "🥕",
     rating: 4.6,
     orders: 18,
+    image: carrotImg,
   },
   {
     id: "LST004",
@@ -195,6 +199,7 @@ export const cropListings = [
     icon: "🫑",
     rating: 4.7,
     orders: 33,
+    image: capsicumImg,
   },
   {
     id: "LST005",
@@ -215,6 +220,7 @@ export const cropListings = [
     icon: "🥬",
     rating: 4.5,
     orders: 12,
+    image: leeksImg,
   },
   {
     id: "LST006",
@@ -235,6 +241,7 @@ export const cropListings = [
     icon: "🥔",
     rating: 4.4,
     orders: 9,
+    image: potatoImg,
   },
 ];
 
@@ -270,3 +277,5 @@ export const traceabilitySteps = [
   { step: "Dispatched",        date: "Jul 12, 2026", location: "AgroHub JIT",   done: false },
   { step: "Delivered",         date: "Jul 13, 2026", location: "Colombo 05",    done: false },
 ];
+
+export { bigOnionImg, tomatoImg, carrotImg, capsicumImg, potatoImg, leeksImg };
