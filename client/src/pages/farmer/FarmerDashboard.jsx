@@ -1,4 +1,5 @@
 import { useState  } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -8,7 +9,10 @@ import {
   AlertTriangle, CheckCircle, LogOut, Sprout, Info,
   Settings, TrendingUp, ClipboardList, Menu
 } from 'lucide-react';
-import { mockPrediction, cropAdvisory, harvestAlerts, availableCrops } from '../../data/mockData';
+import {
+  fetchPrediction, fetchAdvisory, fetchAlerts,
+  fetchAvailableCrops, fetchOrders,
+} from '../../api/client';
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -49,13 +53,6 @@ const cropPrices = [
   { rank: 3, name: 'Carrot', price: '₨ 185.10', change: '+2.5%', direction: 'positive', label: 'Sage', updated: 'Last updated Jul 6, 2026' },
 ];
 
-const activeOrders = [
-  { id: '#ORD-1023', crop: 'Big Onion', quantity: '500 kg', status: 'Processing', statusClass: 'status-processing', price: '₨ 105,000' },
-  { id: '#ORD-1022', crop: 'Capsicum', quantity: '200 kg', status: 'Shipped', statusClass: 'status-shipped', price: '₨ 59,160' },
-  { id: '#ORD-1021', crop: 'Carrot', quantity: '350 kg', status: 'Completed', statusClass: 'status-completed', price: '₨ 50,750' },
-  { id: '#ORD-1020', crop: 'Leeks', quantity: '180 kg', status: 'Processing', statusClass: 'status-processing', price: '₨ 29,700' },
-];
-
 const forecastChartData = [
   { month: 'Jul', onion: 90, capsicum: 80 },
   { month: 'Aug', onion: 120, capsicum: 110 },
@@ -72,12 +69,38 @@ export default function FarmerDashboard() {
   const [dispatchReady, setDispatchReady] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const prediction = mockPrediction;
+  // ─── API Data Fetching ───────────────────────────────
+  const { data: prediction } = useQuery({
+    queryKey: ['prediction', selectedCrop],
+    queryFn: () => fetchPrediction(selectedCrop),
+  });
+
+  const { data: cropAdvisory = [] } = useQuery({
+    queryKey: ['advisory'],
+    queryFn: fetchAdvisory,
+  });
+
+  const { data: harvestAlerts = [] } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: fetchAlerts,
+  });
+
+  const { data: availableCrops = [] } = useQuery({
+    queryKey: ['availableCrops'],
+    queryFn: fetchAvailableCrops,
+  });
+
+  const { data: activeOrders = [] } = useQuery({
+    queryKey: ['orders'],
+    queryFn: fetchOrders,
+  });
+
   const allChecked = packagingItems.filter(i => i.required).every(i => checkedItems[i.id]);
   const toggleCheck = id => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
-  const garchRisk = prediction.garch_metrics.risk_score;
+  // Guard: don't render analytics if prediction hasn't loaded yet
+  const garchRisk = prediction?.garch_metrics?.risk_score ?? 0;
   const riskColor = garchRisk >= 70 ? 'var(--red)' : garchRisk >= 45 ? 'var(--amber)' : 'var(--primary)';
   const riskLabel = garchRisk >= 70 ? 'High Risk' : garchRisk >= 45 ? 'Moderate Risk' : 'Low Risk';
 
@@ -178,11 +201,11 @@ export default function FarmerDashboard() {
                     </thead>
                     <tbody>
                       {activeOrders.map(order => (
-                        <tr key={order.id}>
-                          <td className="fw-600">{order.id}</td>
+                        <tr key={order.order_number}>
+                          <td className="fw-600">{order.order_number}</td>
                           <td>{order.crop}</td>
                           <td>{order.quantity}</td>
-                          <td><span className={`status-badge ${order.statusClass}`}>{order.status}</span></td>
+                          <td><span className={`status-badge ${order.status_class}`}>{order.status}</span></td>
                           <td className="fw-600">{order.price}</td>
                         </tr>
                       ))}
@@ -211,7 +234,7 @@ export default function FarmerDashboard() {
 
               <div className="advisor-card-list">
                 {cropAdvisory.map(item => (
-                  <div key={item.id} className="dash-info-card advisor-card">
+                  <div key={item.advisory_id} className="dash-info-card advisor-card">
                     <div className="advisor-card-icon">{item.icon}</div>
                     <div className="advisor-card-content">
                       <div className="advisor-card-header">
@@ -240,6 +263,10 @@ export default function FarmerDashboard() {
           {/* ANALYTICS */}
           {activeTab === 'forecast' && (
             <div className="animate-fade-in">
+              {!prediction ? (
+                <div style={{ padding: 'var(--sp-10)', textAlign: 'center', color: 'var(--text-muted)' }}>Loading analytics...</div>
+              ) : (
+              <>
               <div className="dash-header dash-header-spaced">
                 <div>
                   <h1 className="dash-page-title">Analytics</h1>
@@ -318,6 +345,8 @@ export default function FarmerDashboard() {
                   </p>
                 </div>
               </div>
+              </>
+              )}
             </div>
           )}
 
@@ -333,12 +362,12 @@ export default function FarmerDashboard() {
               </div>
 
               {harvestAlerts.map(alert => (
-                <div key={alert.id} className="dash-alert-card">
+                <div key={alert.alert_id} className="dash-alert-card">
                   <div className="dash-alert-layout">
                     <div className="dash-alert-icon">🧅</div>
                     <div className="advisor-card-content">
                       <div className="dash-alert-header">
-                        <h3 className="dash-alert-title">{alert.crop} — {alert.id}</h3>
+                        <h3 className="dash-alert-title">{alert.crop} — {alert.alert_id}</h3>
                         <span className="status-badge status-processing">Harvest Window</span>
                       </div>
                       <div className="dash-detail-grid dash-detail-grid-spaced">
@@ -364,11 +393,11 @@ export default function FarmerDashboard() {
                   <thead><tr><th>Order ID</th><th>Crop</th><th>Quantity</th><th>Status</th><th>Price</th></tr></thead>
                   <tbody>
                     {activeOrders.map(order => (
-                      <tr key={order.id}>
-                        <td className="fw-600">{order.id}</td>
+                      <tr key={order.order_number}>
+                        <td className="fw-600">{order.order_number}</td>
                         <td>{order.crop}</td>
                         <td>{order.quantity}</td>
-                        <td><span className={`status-badge ${order.statusClass}`}>{order.status}</span></td>
+                        <td><span className={`status-badge ${order.status_class}`}>{order.status}</span></td>
                         <td className="fw-600">{order.price}</td>
                       </tr>
                     ))}

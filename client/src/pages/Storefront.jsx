@@ -1,9 +1,11 @@
 import { useState, useMemo  } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Truck, Shield, Recycle, TrendingUp } from 'lucide-react';
 import HeroBanner from '../components/storefront/HeroBanner';
 import FilterSidebar from '../components/storefront/FilterSidebar';
 import ProductGrid from '../components/storefront/ProductGrid';
-import { cropListings } from '../data/mockData';
+import { fetchCrops } from '../api/client';
+
 
 const trustItems = [
   { icon: <Truck size={20} />, text: 'Farm-to-Door in 24–72 hrs' },
@@ -16,6 +18,11 @@ export default function Storefront() {
   const [sortBy, setSortBy] = useState('featured');
     const [filters, setFilters] = useState({ origins: [], grades: [], certifications: [] });
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+
+  const { data: cropListings = [], isLoading, isError } = useQuery({
+    queryKey: ['crops'],
+    queryFn: fetchCrops,
+  });
 
   const filtered = useMemo(() => {
     let list = [...cropListings];
@@ -44,7 +51,7 @@ export default function Storefront() {
       default: break;
     }
     return list;
-  }, [filters, priceRange, sortBy]);
+  }, [cropListings, filters, priceRange, sortBy]);
 
   const handleAddToCart = listing => console.log("Added to cart", listing);
 
