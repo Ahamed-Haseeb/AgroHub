@@ -52,10 +52,20 @@ export const fetchAvailableCrops = async () => {
   return data;
 };
 
-// ─── Platform Stats ─────────────────────────────────────
+// ─── Platform Stats & Market ─────────────────────────────
 
 export const fetchStats = async () => {
   const { data } = await api.get("/stats");
+  return data;
+};
+
+export const fetchMarketPrices = async () => {
+  const { data } = await api.get("/market/prices");
+  return data;
+};
+
+export const fetchTraceability = async (orderId) => {
+  const { data } = await api.get(`/orders/${orderId}/traceability`);
   return data;
 };
 

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import {
   fetchPrediction, fetchAdvisory, fetchAlerts,
-  fetchAvailableCrops, fetchOrders,
+  fetchAvailableCrops, fetchOrders, fetchMarketPrices
 } from '../../api/client';
 
 function ChartTooltip({ active, payload, label }) {
@@ -47,20 +47,7 @@ const packagingItems = [
   { id: 'p6', label: 'Cold chain pickup notified', required: false },
 ];
 
-const cropPrices = [
-  { rank: 1, name: 'Big Onion', price: '₨ 310.50', change: '+3.2%', direction: 'positive', label: 'Sage', updated: 'Last updated Jul 6, 2026' },
-  { rank: 2, name: 'Capsicum', price: '₨ 295.80', change: '-1.1%', direction: 'negative', label: 'Terracotta', updated: 'Last updated Jul 6, 2026' },
-  { rank: 3, name: 'Carrot', price: '₨ 185.10', change: '+2.5%', direction: 'positive', label: 'Sage', updated: 'Last updated Jul 6, 2026' },
-];
 
-const forecastChartData = [
-  { month: 'Jul', onion: 90, capsicum: 80 },
-  { month: 'Aug', onion: 120, capsicum: 110 },
-  { month: 'Sep', onion: 180, capsicum: 140 },
-  { month: 'Oct', onion: 240, capsicum: 200 },
-  { month: 'Nov', onion: 280, capsicum: 310 },
-  { month: 'Dec', onion: 350, capsicum: 340 },
-];
 
 export default function FarmerDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -73,6 +60,11 @@ export default function FarmerDashboard() {
   const { data: prediction } = useQuery({
     queryKey: ['prediction', selectedCrop],
     queryFn: () => fetchPrediction(selectedCrop),
+  });
+
+  const { data: cropPrices = [] } = useQuery({
+    queryKey: ['marketPrices'],
+    queryFn: fetchMarketPrices,
   });
 
   const { data: cropAdvisory = [] } = useQuery({
@@ -179,15 +171,18 @@ export default function FarmerDashboard() {
                 <div className="dash-chart-card">
                   <div className="dash-chart-title">Crop Price Forecast (Next 6 Months)</div>
                   <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={forecastChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    {prediction ? (
+                    <LineChart data={prediction.forecast.slice(0, 12)} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
+                      <XAxis dataKey="week_label" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
                       <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 13 }} axisLine={false} tickLine={false} tickFormatter={v => `₨${v}`} />
                       <Tooltip content={<ChartTooltip />} />
                       <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} iconType="plainline" />
-                      <Line type="monotone" dataKey="onion" name="Big Onion" stroke="var(--primary)" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
-                      <Line type="monotone" dataKey="capsicum" name="Capsicum" stroke="var(--primary)" strokeWidth={2.5} strokeDasharray="6 4" dot={false} activeDot={{ r: 5 }} />
+                      <Line type="monotone" dataKey="price" name="Forecast Price" stroke="var(--primary)" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
                     </LineChart>
+                    ) : (
+                      <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Loading forecast chart...</div>
+                    )}
                   </ResponsiveContainer>
                 </div>
               </div>

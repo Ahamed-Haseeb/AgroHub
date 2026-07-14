@@ -8,6 +8,8 @@ import cropRoutes from "./routes/cropRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
+import marketRoutes from "./routes/marketRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 // Load environment variables
 dotenv.config();

@@ -4,8 +4,8 @@ import {
   ArrowRight, Leaf, TrendingUp, Truck, Shield,
   BarChart2, Zap, CheckCircle, Globe, Users
 } from 'lucide-react';
-import { platformStats } from '../data/mockData';
-
+import { useQuery } from '@tanstack/react-query';
+import { fetchStats } from '../api/client';
 // Animated 
 function useCountUp(target, duration = 1800, start = false) {
   const [value, setValue] = useState(0);
@@ -79,6 +79,7 @@ const howItWorks = [
 ];
 
 export default function LandingPage() {
+  const { data: platformStats = [] } = useQuery({ queryKey: ['stats'], queryFn: fetchStats });
   const statsRef = useRef(null);
   const [statsVisible, setStatsVisible] = useState(false);
 

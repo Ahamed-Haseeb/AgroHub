@@ -8,7 +8,8 @@ import {
   Package, Truck, Clock, CheckCircle, ArrowRight,
   TrendingUp, Leaf, ChevronDown, X
 } from 'lucide-react';
-import { cropListings, mockPrediction, traceabilitySteps } from '../../data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchCrops, fetchPrediction, fetchTraceability } from '../../api/client';
 
 // ── Price Tooltip ──
 function PriceTooltip({ active, payload, label }) {
@@ -223,14 +224,15 @@ function OrderModal({ listing, onClose }) {
 }
 
 // ── Traceability Panel ──
-function TraceabilityPanel() {
+function TraceabilityPanel({ steps = [] }) {
+  if (!steps.length) return null;
   return (
     <div className="chart-container" style={{ height: 'fit-content' }}>
       <div className="chart-title" style={{ marginBottom: 'var(--space-2)' }}>📍 Order Traceability</div>
       <div className="chart-subtitle">Big Onion · Order #ALERT001</div>
       <div className="timeline" style={{ marginTop: 'var(--space-5)' }}>
-        {traceabilitySteps.map((step, i) => {
-          const isActive = !step.done && (i === 0 || traceabilitySteps[i - 1].done);
+        {steps.map((step, i) => {
+          const isActive = !step.done && (i === 0 || steps[i - 1].done);
           return (
             <div key={step.step} className="timeline-item">
               <div className={`timeline-dot ${step.done ? 'done' : isActive ? 'active' : ''}`}>
@@ -271,6 +273,10 @@ export default function BuyerMarketplace() {
   const [sortBy,        setSortBy]        = useState('default');
   const [selectedItem,  setSelectedItem]  = useState(null);
   const [cartCount,     setCartCount]     = useState(0);
+
+  const { data: cropListings = [] } = useQuery({ queryKey: ['crops'], queryFn: fetchCrops });
+  const { data: prediction } = useQuery({ queryKey: ['prediction', 'ONION_BIG_LK'], queryFn: () => fetchPrediction('ONION_BIG_LK') });
+  const { data: traceabilitySteps = [] } = useQuery({ queryKey: ['traceability', 'ALERT001'], queryFn: () => fetchTraceability('ALERT001') });
 
   const filtered = cropListings
     .filter(l =>
@@ -430,8 +436,9 @@ export default function BuyerMarketplace() {
                 SARIMA 12-week forecast
               </div>
               <ResponsiveContainer width="100%" height={130}>
+                {prediction ? (
                 <AreaChart
-                  data={mockPrediction.forecast.slice(0, 12)}
+                  data={prediction.forecast.slice(0, 12)}
                   margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
                 >
                   <defs>
@@ -445,6 +452,9 @@ export default function BuyerMarketplace() {
                   <Tooltip content={<PriceTooltip />} />
                   <Area type="monotone" dataKey="price" name="₨/kg" stroke="#22c55e" strokeWidth={1.5} fill="url(#buyerPriceGrad)" />
                 </AreaChart>
+                ) : (
+                  <div style={{ height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 12 }}>Loading forecast...</div>
+                )}
               </ResponsiveContainer>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
                 <span>Current: <strong style={{ color: 'var(--agro-green-light)' }}>₨ 210</strong></span>
@@ -453,7 +463,7 @@ export default function BuyerMarketplace() {
             </div>
 
             {/* Traceability */}
-            <TraceabilityPanel />
+            <TraceabilityPanel steps={traceabilitySteps} />
 
             {/* Why AgroHub */}
             <div className="card" style={{ background: 'linear-gradient(145deg, rgba(22,163,74,0.08), var(--bg-card))' }}>

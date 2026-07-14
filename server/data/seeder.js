@@ -8,6 +8,8 @@ import Order from "../models/Order.js";
 import HarvestAlert from "../models/HarvestAlert.js";
 import CropAdvisory from "../models/Advisory.js";
 import PlatformStat from "../models/Stat.js";
+import MarketPrice from "../models/MarketPrice.js";
+import Traceability from "../models/Traceability.js";
 
 dotenv.config();
 
@@ -238,6 +240,21 @@ const platformStats = [
   { label: "LKR Saved (Farmers)", value: "₨ 18.4M", unit: "/mo", icon: "💰" },
 ];
 
+const marketPrices = [
+  { rank: 1, name: 'Big Onion', price: '₨ 310.50', change: '+3.2%', direction: 'positive', label: 'Sage', updated: 'Last updated Jul 6, 2026' },
+  { rank: 2, name: 'Capsicum', price: '₨ 295.80', change: '-1.1%', direction: 'negative', label: 'Terracotta', updated: 'Last updated Jul 6, 2026' },
+  { rank: 3, name: 'Carrot', price: '₨ 185.10', change: '+2.5%', direction: 'positive', label: 'Sage', updated: 'Last updated Jul 6, 2026' },
+];
+
+const traceabilitySteps = [
+  { order_id: 'ALERT001', order_index: 0, step: "Advance Payment Verified", date: "Jul 1, 2026 09:12 AM", location: "Cargills Bank", done: true },
+  { order_id: 'ALERT001', order_index: 1, step: "JIT Harvest Alert Sent", date: "Jul 1, 2026 09:15 AM", location: "AgroHub AI Node", done: true },
+  { order_id: 'ALERT001', order_index: 2, step: "Farmer Accepted", date: "Jul 1, 2026 10:45 AM", location: "Dambulla Farm", done: true },
+  { order_id: 'ALERT001', order_index: 3, step: "Crate Inspection", date: "Jul 9, 2026 08:00 AM", location: "Collection Center B", done: false },
+  { order_id: 'ALERT001', order_index: 4, step: "Harvest Window Open", date: "Jul 10, 2026", location: "Dambulla Farm", done: false },
+  { order_id: 'ALERT001', order_index: 5, step: "Cold Chain Pickup", date: "Jul 11, 2026", location: "Dambulla Farm", done: false },
+];
+
 // ─── Import / Destroy Logic ──────────────────────────────
 
 const importData = async () => {
@@ -250,6 +267,8 @@ const importData = async () => {
     await HarvestAlert.deleteMany();
     await CropAdvisory.deleteMany();
     await PlatformStat.deleteMany();
+    await MarketPrice.deleteMany();
+    await Traceability.deleteMany();
 
     // Insert seed data
     await CropListing.insertMany(cropListings);
@@ -257,6 +276,8 @@ const importData = async () => {
     await HarvestAlert.insertMany(harvestAlerts);
     await CropAdvisory.insertMany(cropAdvisory);
     await PlatformStat.insertMany(platformStats);
+    await MarketPrice.insertMany(marketPrices);
+    await Traceability.insertMany(traceabilitySteps);
 
     console.log("✅ Data seeded successfully!");
     console.log(`   📦 ${cropListings.length} crop listings`);
@@ -280,6 +301,8 @@ const destroyData = async () => {
     await HarvestAlert.deleteMany();
     await CropAdvisory.deleteMany();
     await PlatformStat.deleteMany();
+    await MarketPrice.deleteMany();
+    await Traceability.deleteMany();
 
     console.log("🗑️  All data destroyed!");
     process.exit();
