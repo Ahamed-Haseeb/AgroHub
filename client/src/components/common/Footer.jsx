@@ -1,4 +1,3 @@
-import React from 'react';
 import { Leaf } from 'lucide-react';
 import { FaXTwitter, FaLinkedinIn, FaGithub, FaEnvelope } from 'react-icons/fa6';
 

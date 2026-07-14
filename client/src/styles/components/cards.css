@@ -131,3 +131,11 @@
   color: var(--text-muted);
   font-weight: 500;
 }
+
+/* ---------- Extracted Inline Styles ---------- */
+
+.product-rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}

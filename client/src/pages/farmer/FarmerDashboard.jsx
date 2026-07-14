@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -13,14 +13,10 @@ import { mockPrediction, cropAdvisory, harvestAlerts, availableCrops } from '../
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      background: 'var(--bg-white)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-md)', padding: '10px 14px',
-      fontSize: 13, boxShadow: 'var(--shadow-lg)'
-    }}>
-      <p style={{ fontWeight: 700, marginBottom: 4, color: 'var(--text-heading)' }}>{label}</p>
+    <div className="dash-tooltip">
+      <p className="dash-tooltip-title">{label}</p>
       {payload.map(p => (
-        <p key={p.dataKey} style={{ color: p.color, marginBottom: 2 }}>
+        <p key={p.dataKey} className="dash-tooltip-item" style={{ color: p.color }}>
           {p.name}: <strong>₨ {p.value?.toLocaleString('en-LK')}</strong>
         </p>
       ))}
@@ -90,7 +86,7 @@ export default function FarmerDashboard() {
       {/* Mobile header */}
       <div className="dash-mobile-header">
         <span><Leaf size={18} /> AgroHub</span>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: 'white' }}>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="dash-mobile-menu-btn">
           <Menu size={20} />
         </button>
       </div>
@@ -149,7 +145,7 @@ export default function FarmerDashboard() {
                     <div key={crop.rank} className="crop-price-card">
                       <div className="crop-price-rank">{crop.rank}. {crop.name}</div>
                       <div className="crop-price-value">{crop.price}</div>
-                      <div className="crop-price-change" style={{ color: crop.direction === 'positive' ? 'var(--primary)' : 'var(--amber)' }}>
+                      <div className={`crop-price-change ${crop.direction}`}>
                         {crop.change}, {crop.label}
                       </div>
                       <div className="crop-price-updated">{crop.updated}</div>
@@ -201,39 +197,35 @@ export default function FarmerDashboard() {
           {activeTab === 'advisor' && (
             <div className="animate-fade-in">
               <h1 className="dash-page-title">Crop Advisor</h1>
-              <p className="dash-page-date">AI-powered recommendations based on national import gaps</p>
+              <p className="dash-page-date">Market recommendations based on national import gaps</p>
 
-              <div className="dash-info-banner" style={{ marginTop: 28, marginBottom: 20 }}>
-                <span style={{ fontSize: 22 }}>🤖</span>
+              <div className="dash-info-banner advisor-banner">
+                <TrendingUp size={22} color="var(--primary)" />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>AI Analysis — July 2026</div>
-                  <p style={{ color: 'var(--text-body)', fontSize: 14, lineHeight: 1.6 }}>
+                  <div className="advisor-banner-title">Market Analysis — July 2026</div>
+                  <p className="advisor-banner-text">
                     Based on CMC wholesale data and SARIMA models for Q3 2026, these crops show the highest ROI for Dambulla.
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="advisor-card-list">
                 {cropAdvisory.map(item => (
-                  <div key={item.id} className="dash-info-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <div style={{
-                      width: 48, height: 48, borderRadius: 'var(--radius-md)',
-                      background: 'var(--bg-surface)', display: 'flex',
-                      alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0
-                    }}>{item.icon}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                        <h3 style={{ fontSize: 16, fontWeight: 700 }}>{item.crop}</h3>
+                  <div key={item.id} className="dash-info-card advisor-card">
+                    <div className="advisor-card-icon">{item.icon}</div>
+                    <div className="advisor-card-content">
+                      <div className="advisor-card-header">
+                        <h3 className="advisor-card-title">{item.crop}</h3>
                         <span className={`badge ${item.urgency === 'high' ? 'badge-green' : item.urgency === 'medium' ? 'badge-amber' : 'badge-muted'}`}>
                           {item.urgency === 'high' ? 'Top Pick' : item.urgency === 'medium' ? 'Recommended' : 'Stable'}
                         </span>
                       </div>
-                      <p style={{ color: 'var(--text-body)', fontSize: 14, lineHeight: 1.6, marginBottom: 10 }}>{item.reason}</p>
-                      <div style={{ display: 'flex', gap: 28 }}>
+                      <p className="advisor-card-desc">{item.reason}</p>
+                      <div className="advisor-card-metrics">
                         {[['ROI', item.roi_estimate, 'var(--primary)'], ['Risk', item.risk, item.risk === 'Low' ? 'var(--primary)' : 'var(--amber)'], ['Season', item.season, 'var(--text-body)']].map(([k, v, c]) => (
                           <div key={k}>
                             <div className="dash-detail-label">{k}</div>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: c }}>{v}</div>
+                            <div className="advisor-card-metric-val" style={{ color: c }}>{v}</div>
                           </div>
                         ))}
                       </div>
@@ -248,17 +240,17 @@ export default function FarmerDashboard() {
           {/* ANALYTICS */}
           {activeTab === 'forecast' && (
             <div className="animate-fade-in">
-              <div className="dash-header" style={{ marginBottom: 28 }}>
+              <div className="dash-header dash-header-spaced">
                 <div>
                   <h1 className="dash-page-title">Analytics</h1>
                   <p className="dash-page-date">SARIMA + GARCH model outputs · Weekly LKR/kg</p>
                 </div>
-                <select className="input select" style={{ width: 180 }} value={selectedCrop} onChange={e => setSelectedCrop(e.target.value)}>
+                <select className="input select dash-crop-select" value={selectedCrop} onChange={e => setSelectedCrop(e.target.value)}>
                   {availableCrops.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
 
-              <div className="dash-metric-grid" style={{ marginBottom: 24 }}>
+              <div className="dash-metric-grid dash-metric-grid-spaced">
                 {[
                   { label: 'GARCH(1,1) Volatility', value: `${(prediction.garch_metrics.current_volatility * 100).toFixed(1)}%`, sub: 'Current σ', color: 'var(--blue)', pct: prediction.garch_metrics.current_volatility * 300, gaugeClass: 'gauge-amber' },
                   { label: 'Risk Score', value: `${garchRisk}/100`, sub: riskLabel, color: riskColor, pct: garchRisk, gaugeClass: garchRisk >= 70 ? 'gauge-red' : garchRisk >= 45 ? 'gauge-amber' : 'gauge-green' },
@@ -273,10 +265,10 @@ export default function FarmerDashboard() {
                 ))}
               </div>
 
-              <div className="dash-chart-card" style={{ marginBottom: 24 }}>
+              <div className="dash-chart-card dash-chart-card-spaced">
                 <div className="dash-chart-title">52-Week SARIMA Forecast — {prediction.crop_name}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{prediction.model} · 95% CI</span>
+                <div className="dash-chart-meta">
+                  <span className="dash-chart-model">{prediction.model} · 95% CI</span>
                   <span className="badge badge-amber">⚡ Lean: Weeks 21–29, 49–52</span>
                 </div>
                 <ResponsiveContainer width="100%" height={260}>
@@ -319,10 +311,10 @@ export default function FarmerDashboard() {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-                <div className="dash-info-banner" style={{ marginTop: 16 }}>
-                  <Info size={14} color="var(--primary)" style={{ marginTop: 2, flexShrink: 0 }} />
-                  <p style={{ fontSize: 14, color: 'var(--text-body)', lineHeight: 1.6 }}>
-                    <strong>AI Recommendation: </strong>{prediction.garch_metrics.recommendation}
+                <div className="dash-info-banner dash-info-banner-mt">
+                  <Info size={14} color="var(--primary)" className="dash-info-icon" />
+                  <p className="dash-info-text">
+                    <strong>Market Recommendation: </strong>{prediction.garch_metrics.recommendation}
                   </p>
                 </div>
               </div>
@@ -335,21 +327,21 @@ export default function FarmerDashboard() {
               <h1 className="dash-page-title">Orders</h1>
               <p className="dash-page-date">JIT harvest alerts and active order management</p>
 
-              <div style={{ background: 'var(--amber-light)', border: '1px solid var(--amber)', borderRadius: 'var(--radius-md)', padding: 14, marginTop: 28, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="dash-policy-banner">
                 <AlertTriangle size={18} color="var(--amber)" />
-                <p style={{ color: '#92400e', fontSize: 14 }}><strong>Policy:</strong> Harvest is triggered only after buyer payment is validated.</p>
+                <p className="dash-policy-text"><strong>Policy:</strong> Harvest is triggered only after buyer payment is validated.</p>
               </div>
 
               {harvestAlerts.map(alert => (
                 <div key={alert.id} className="dash-alert-card">
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                    <div style={{ fontSize: 32 }}>🧅</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                        <h3 style={{ fontSize: 17, fontWeight: 700 }}>{alert.crop} — {alert.id}</h3>
+                  <div className="dash-alert-layout">
+                    <div className="dash-alert-icon">🧅</div>
+                    <div className="advisor-card-content">
+                      <div className="dash-alert-header">
+                        <h3 className="dash-alert-title">{alert.crop} — {alert.id}</h3>
                         <span className="status-badge status-processing">Harvest Window</span>
                       </div>
-                      <div className="dash-detail-grid" style={{ marginBottom: 14 }}>
+                      <div className="dash-detail-grid dash-detail-grid-spaced">
                         {[['Buyer', alert.buyer], ['Quantity', `${alert.quantity_kg.toLocaleString()} kg`], ['Value', `₨ ${alert.order_value_lkr.toLocaleString('en-LK')}`], ['Window', alert.harvest_window]].map(([k, v]) => (
                           <div key={k} className="dash-detail-item">
                             <div className="dash-detail-label">{k}</div>
@@ -359,14 +351,14 @@ export default function FarmerDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
+                  <div className="dash-alert-actions">
                     <button className="btn btn-outline btn-sm">Reschedule</button>
                     <button className="btn btn-primary">✓ Confirm Harvest</button>
                   </div>
                 </div>
               ))}
 
-              <div className="orders-card" style={{ marginTop: 24 }}>
+              <div className="orders-card orders-card-spaced">
                 <div className="orders-title">All Orders</div>
                 <table className="orders-table">
                   <thead><tr><th>Order ID</th><th>Crop</th><th>Quantity</th><th>Status</th><th>Price</th></tr></thead>
@@ -392,10 +384,10 @@ export default function FarmerDashboard() {
               <h1 className="dash-page-title">Inventory & Packaging</h1>
               <p className="dash-page-date">Pre-dispatch checklist and compliance</p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.7fr', gap: 24, marginTop: 28 }}>
-                <div className="dash-info-card" style={{ padding: 28 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Pre-Dispatch Checklist</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="dash-inventory-layout">
+                <div className="dash-info-card dash-info-card-large">
+                  <h3 className="dash-checklist-title">Pre-Dispatch Checklist</h3>
+                  <div className="dash-checklist">
                     {packagingItems.map(item => (
                       <label
                         key={item.id}
@@ -406,16 +398,16 @@ export default function FarmerDashboard() {
                           type="checkbox" id={`check-${item.id}`}
                           checked={!!checkedItems[item.id]}
                           onChange={() => toggleCheck(item.id)}
-                          style={{ width: 18, height: 18, accentColor: 'var(--primary)', cursor: 'pointer' }}
+                          className="dash-checklist-checkbox"
                         />
                         <span className={`dash-checklist-label ${checkedItems[item.id] ? 'done' : ''}`}>{item.label}</span>
-                        {item.required && <span className="badge badge-red" style={{ fontSize: 10 }}>Required</span>}
+                        {item.required && <span className="badge badge-red badge-small">Required</span>}
                         {checkedItems[item.id] && <CheckCircle size={16} color="var(--primary)" />}
                       </label>
                     ))}
                   </div>
 
-                  <div style={{ marginTop: 20 }}>
+                  <div className="dash-progress-section">
                     <div className="dash-progress-bar">
                       <span>Progress</span>
                       <span className="fw-700 text-heading">{checkedCount}/{packagingItems.length}</span>
@@ -427,8 +419,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <button
-                    className={`btn ${allChecked ? 'btn-primary' : 'btn-outline'} btn-block btn-lg`}
-                    style={{ marginTop: 16 }}
+                    className={`btn ${allChecked ? 'btn-primary' : 'btn-outline'} btn-block btn-lg dash-checklist-submit`}
                     disabled={!allChecked}
                     onClick={() => setDispatchReady(true)}
                   >
@@ -436,22 +427,22 @@ export default function FarmerDashboard() {
                   </button>
 
                   {dispatchReady && (
-                    <div style={{ marginTop: 12, background: 'var(--primary-light)', borderRadius: 'var(--radius-md)', padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="dash-dispatch-success">
                       <CheckCircle size={16} color="var(--primary)" />
-                      <span style={{ color: 'var(--primary)', fontWeight: 600, fontSize: 14 }}>Dispatch confirmed!</span>
+                      <span className="dash-dispatch-success-text">Dispatch confirmed!</span>
                     </div>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="advisor-card-list">
                   {[
                     { title: '📦 Crate Standard', text: 'Ventilated plastic crates (Type-3 HDPE), minimum 12% open area. Max: 25 kg/crate.' },
                     { title: '🌡️ Temperature', text: 'Post-harvest: 18–24°C. Cold chain transit: 8–12°C.' },
                     { title: '🏆 Compliance', text: 'Your score: 98/100. >95 = premium buyer placement.' },
                   ].map(c => (
-                    <div key={c.title} className="dash-info-card" style={{ padding: 18 }}>
-                      <h4 style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{c.title}</h4>
-                      <p style={{ color: 'var(--text-body)', fontSize: 14, lineHeight: 1.6 }}>{c.text}</p>
+                    <div key={c.title} className="dash-info-card dash-info-item">
+                      <h4 className="dash-info-item-title">{c.title}</h4>
+                      <p className="advisor-banner-text">{c.text}</p>
                     </div>
                   ))}
                 </div>
@@ -462,7 +453,7 @@ export default function FarmerDashboard() {
           {/* MARKET */}
           {activeTab === 'my-listings' && (
             <div className="animate-fade-in">
-              <div className="dash-header" style={{ marginBottom: 28 }}>
+              <div className="dash-header dash-header-spaced">
                 <div>
                   <h1 className="dash-page-title">My Listings</h1>
                   <p className="dash-page-date">Manage your active marketplace listings</p>
@@ -500,8 +491,8 @@ export default function FarmerDashboard() {
               <h1 className="dash-page-title">Settings</h1>
               <p className="dash-page-date">Account preferences and configuration</p>
 
-              <div className="dash-info-card" style={{ padding: 28, marginTop: 28, maxWidth: 600 }}>
-                <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Profile</h3>
+              <div className="dash-info-card dash-settings-card">
+                <h3 className="dash-settings-title">Profile</h3>
                 {[
                   ['Full Name', 'Suresh Perera'],
                   ['Email', 'suresh.perera@agrohub.lk'],

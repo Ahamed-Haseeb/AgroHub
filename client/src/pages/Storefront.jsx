@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo  } from 'react';
 import { Truck, Shield, Recycle, TrendingUp } from 'lucide-react';
 import HeroBanner from '../components/storefront/HeroBanner';
 import FilterSidebar from '../components/storefront/FilterSidebar';
@@ -14,8 +14,7 @@ const trustItems = [
 
 export default function Storefront() {
   const [sortBy, setSortBy] = useState('featured');
-  const [cartItems, setCartItems] = useState([]);
-  const [filters, setFilters] = useState({ origins: [], grades: [], certifications: [] });
+    const [filters, setFilters] = useState({ origins: [], grades: [], certifications: [] });
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
   const filtered = useMemo(() => {
@@ -47,7 +46,7 @@ export default function Storefront() {
     return list;
   }, [filters, priceRange, sortBy]);
 
-  const handleAddToCart = listing => setCartItems(prev => [...prev, listing]);
+  const handleAddToCart = listing => console.log("Added to cart", listing);
 
   const handleFilterChange = (type, value) => {
     setFilters(prev => {
@@ -64,7 +63,7 @@ export default function Storefront() {
   };
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="storefront-page">
       <div className="container">
         <HeroBanner />
       </div>
@@ -77,7 +76,7 @@ export default function Storefront() {
             onPriceChange={handlePriceChange}
             priceRange={priceRange}
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="storefront-main">
             <ProductGrid
               listings={filtered}
               totalCount={cropListings.length}

@@ -380,3 +380,255 @@
   font-size: 18px;
   font-weight: 800;
 }
+
+/* ---------- Extracted Inline Styles ---------- */
+
+.dash-tooltip {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+}
+.dash-tooltip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-heading);
+}
+.dash-tooltip-item {
+  margin-bottom: 2px;
+}
+
+.dash-mobile-menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.advisor-banner {
+  margin: 28px 0 20px;
+}
+.advisor-banner-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.advisor-banner-text {
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.advisor-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.advisor-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.advisor-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.advisor-card-content {
+  flex: 1;
+}
+.advisor-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.advisor-card-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+.advisor-card-desc {
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.advisor-card-metrics {
+  display: flex;
+  gap: 28px;
+}
+.advisor-card-metric-val {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dash-header-spaced {
+  margin-bottom: 28px;
+}
+.dash-crop-select {
+  width: 180px;
+}
+.dash-metric-grid-spaced {
+  margin-bottom: 24px;
+}
+.dash-chart-card-spaced {
+  margin-bottom: 24px;
+}
+.dash-chart-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.dash-chart-model {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.dash-info-banner-mt {
+  margin-top: 16px;
+}
+.dash-info-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.dash-info-text {
+  font-size: 14px;
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+.dash-policy-banner {
+  background: var(--amber-light);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin: 28px 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-policy-text {
+  color: #92400e;
+  font-size: 14px;
+}
+
+.dash-alert-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.dash-alert-icon {
+  font-size: 32px;
+}
+.dash-alert-content {
+  flex: 1;
+}
+.dash-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.dash-alert-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.dash-detail-grid-spaced {
+  margin-bottom: 14px;
+}
+.dash-alert-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.orders-card-spaced {
+  margin-top: 24px;
+}
+
+.dash-inventory-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 24px;
+  margin-top: 28px;
+}
+.dash-info-card-large {
+  padding: 28px;
+}
+.dash-checklist-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.dash-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dash-checklist-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.badge-small {
+  font-size: 10px;
+}
+.dash-progress-section {
+  margin-top: 20px;
+}
+.dash-checklist-submit {
+  margin-top: 16px;
+}
+.dash-dispatch-success {
+  margin-top: 12px;
+  background: var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-dispatch-success-text {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+.dash-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dash-info-item {
+  padding: 18px;
+}
+.dash-info-item-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.dash-info-item-text {
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dash-settings-card {
+  padding: 28px;
+  margin-top: 28px;
+  max-width: 600px;
+}
+.dash-settings-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}

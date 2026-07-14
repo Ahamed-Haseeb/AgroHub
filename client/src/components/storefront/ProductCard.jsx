@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star, Truck } from 'lucide-react';
 
 export default function ProductCard({ listing, onAddToCart }) {
@@ -20,7 +19,7 @@ export default function ProductCard({ listing, onAddToCart }) {
         <div className="product-card-farmer">By {listing.farmer_name} • {listing.origin}</div>
 
         <div className="product-card-rating">
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+          <span className="product-rating-stars">
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={11} fill={i < filledStars ? '#d4a24e' : 'none'} color={i < filledStars ? '#d4a24e' : 'var(--border)'} />
             ))}

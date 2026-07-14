@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect  } from 'react';
 import { Link } from 'react-router-dom';
 import heroFarmland from '../../assets/banners/hero-farmland.png';
 import heroProduce from '../../assets/banners/hero-produce.png';
@@ -40,7 +40,7 @@ export default function HeroBanner() {
             <div className="hero-content">
               <h1 className="hero-title">{slide.title}</h1>
               <p className="hero-subtitle">{slide.subtitle}</p>
-              <Link to={slide.btnLink} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
+              <Link to={slide.btnLink} className="btn btn-primary hero-btn">
                 {slide.btnText}
               </Link>
             </div>

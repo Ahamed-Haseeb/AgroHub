@@ -191,3 +191,29 @@
   display: none;
   margin-bottom: 12px;
 }
+
+/* ---------- Extracted Inline Styles ---------- */
+
+.storefront-page {
+  min-height: 100vh;
+}
+.storefront-main {
+  flex: 1;
+  min-width: 0;
+}
+.filter-price-inputs {
+  display: flex;
+  gap: 8px;
+}
+.filter-price-col {
+  flex: 1;
+}
+.filter-price-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+.hero-btn {
+  align-self: flex-start;
+}

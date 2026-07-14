@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Search, ShoppingCart, Menu, X } from 'lucide-react';
+import { Leaf, Search, ShoppingCart } from 'lucide-react';
 
 const categories = ["Today's Harvest", 'Best Sellers', 'Organic', 'Root Crops', 'Spices', 'Export Grade', 'Deals'];
 

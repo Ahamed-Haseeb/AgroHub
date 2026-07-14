@@ -1,4 +1,3 @@
-import React from 'react';
 import ProductCard from './ProductCard';
 
 export default function ProductGrid({ listings, onAddToCart, totalCount, sortBy, onSortChange }) {

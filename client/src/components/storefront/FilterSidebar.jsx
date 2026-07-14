@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const filterGroups = [
@@ -45,17 +45,17 @@ export default function FilterSidebar({ filters, onFilterChange, onPriceChange, 
           {expanded.price ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
         {expanded.price && (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Min ₨</label>
+          <div className="filter-price-inputs">
+            <div className="filter-price-col">
+              <label className="filter-price-label">Min ₨</label>
               <input
                 type="number" className="input" placeholder="0"
                 value={priceRange?.min || ''}
                 onChange={e => onPriceChange('min', e.target.value)}
               />
             </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Max ₨</label>
+            <div className="filter-price-col">
+              <label className="filter-price-label">Max ₨</label>
               <input
                 type="number" className="input" placeholder="999"
                 value={priceRange?.max || ''}
