@@ -1,11 +1,22 @@
 {
-  "name": "server",
+  "name": "agrohub-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node data/seeder.js",
+    "seed:destroy": "node data/seeder.js --destroy"
   },
-  "author": "",
+  "keywords": ["agrohub", "agriculture", "jit", "mern"],
+  "author": "AgroHub",
   "license": "ISC",
-  "description": ""
+  "description": "AgroHub MERN Stack Backend — Node.js/Express API with MongoDB",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.4"
+  }
 }
