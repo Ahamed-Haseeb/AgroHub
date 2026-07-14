@@ -1,18 +1,15 @@
 import { useState, useEffect  } from 'react';
 import { Link } from 'react-router-dom';
-import heroFarmland from '../../assets/banners/hero-farmland.png';
-import heroProduce from '../../assets/banners/hero-produce.png';
-
 const slides = [
   {
-    image: heroFarmland,
+    image: '/assets/banners/hero-farmland.png',
     title: "Fresh from Sri Lanka's Farms",
     subtitle: 'Direct-to-consumer. Zero waste. JIT delivery.',
     btnText: 'Shop Now',
     btnLink: '/',
   },
   {
-    image: heroProduce,
+    image: '/assets/banners/hero-produce.png',
     title: 'Peak Season Deals',
     subtitle: 'Dambulla Big Onions at harvest price. Order in advance.',
     btnText: 'Pre-Order Now',

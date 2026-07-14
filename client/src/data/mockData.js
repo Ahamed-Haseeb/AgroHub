@@ -1,10 +1,3 @@
-import bigOnionImg from '../assets/products/big-onion.png';
-import tomatoImg from '../assets/products/tomato.png';
-import carrotImg from '../assets/products/carrot.png';
-import capsicumImg from '../assets/products/capsicum.png';
-import potatoImg from '../assets/products/potato.png';
-import leeksImg from '../assets/products/leeks.png';
-
 // --- SARIMA / GARCH Prediction (matches FastAPI schema) ---
 export const mockPrediction = {
   crop_id: "ONION_BIG_LK",
@@ -136,7 +129,7 @@ export const cropListings = [
     icon: "🧅",
     rating: 4.8,
     orders: 24,
-    image: bigOnionImg,
+    image: '/assets/products/big-onion.png',
   },
   {
     id: "LST002",
@@ -157,7 +150,7 @@ export const cropListings = [
     icon: "🍅",
     rating: 4.9,
     orders: 41,
-    image: tomatoImg,
+    image: '/assets/products/tomato.png',
   },
   {
     id: "LST003",
@@ -178,7 +171,7 @@ export const cropListings = [
     icon: "🥕",
     rating: 4.6,
     orders: 18,
-    image: carrotImg,
+    image: '/assets/products/carrot.png',
   },
   {
     id: "LST004",
@@ -199,7 +192,7 @@ export const cropListings = [
     icon: "🫑",
     rating: 4.7,
     orders: 33,
-    image: capsicumImg,
+    image: '/assets/products/capsicum.png',
   },
   {
     id: "LST005",
@@ -220,7 +213,7 @@ export const cropListings = [
     icon: "🥬",
     rating: 4.5,
     orders: 12,
-    image: leeksImg,
+    image: '/assets/products/leeks.png',
   },
   {
     id: "LST006",
@@ -241,7 +234,7 @@ export const cropListings = [
     icon: "🥔",
     rating: 4.4,
     orders: 9,
-    image: potatoImg,
+    image: '/assets/products/potato.png',
   },
 ];
 
