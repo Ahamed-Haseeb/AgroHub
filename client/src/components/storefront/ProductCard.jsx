@@ -6,7 +6,7 @@ export default function ProductCard({ listing, onAddToCart }) {
   return (
     <div className="product-card">
       <div className="product-card-image">
-        <img src={listing.image} alt={listing.crop_name} />
+        <img src={listing.image_url} alt={listing.crop_name} />
       </div>
 
       <div className="product-card-body">

@@ -20,7 +20,7 @@ export default function ProductGrid({ listings, onAddToCart, totalCount, sortBy,
 
       <div className="product-grid">
         {listings.map(listing => (
-          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} />
+          <ProductCard key={listing.listing_id} listing={listing} onAddToCart={onAddToCart} />
         ))}
       </div>
     </div>
