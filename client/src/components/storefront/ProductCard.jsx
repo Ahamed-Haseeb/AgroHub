@@ -1,4 +1,4 @@
-import { Star, Truck } from 'lucide-react';
+import { Star, Truck, Leaf } from 'lucide-react';
 
 export default function ProductCard({ listing, onAddToCart }) {
   const filledStars = Math.round(listing.rating);
@@ -11,7 +11,7 @@ export default function ProductCard({ listing, onAddToCart }) {
 
       <div className="product-card-body">
         <div className="product-card-badges">
-          {listing.organic && <span className="badge badge-green">🌿 Organic</span>}
+          {listing.organic && <span className="badge badge-green"><Leaf size={12} style={{ display: 'inline', marginRight: 4 }} /> Organic</span>}
           <span className="badge badge-muted">{listing.grade}</span>
         </div>
 

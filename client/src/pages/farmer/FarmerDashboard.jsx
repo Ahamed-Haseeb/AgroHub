@@ -7,12 +7,59 @@ import {
 import {
   Leaf, LayoutDashboard, BarChart2, Bell, Package,
   AlertTriangle, CheckCircle, LogOut, Sprout, Info,
-  Settings, TrendingUp, ClipboardList, Menu
+  Settings, TrendingUp, ClipboardList, Menu,
+  Zap, Thermometer, ShieldCheck
 } from 'lucide-react';
 import {
   fetchPrediction, fetchAdvisory, fetchAlerts,
   fetchAvailableCrops, fetchOrders, fetchMarketPrices
 } from '../../api/client';
+
+const getCropColor = (name) => {
+  const palettes = [
+    { bg: 'rgba(234, 88, 12, 0.1)', text: '#ea580c' },
+    { bg: 'rgba(168, 85, 247, 0.1)', text: '#a855f7' },
+    { bg: 'rgba(37, 99, 235, 0.1)', text: '#2563eb' },
+    { bg: 'rgba(22, 163, 74, 0.1)', text: '#16a34a' },
+    { bg: 'rgba(217, 119, 6, 0.1)', text: '#d97706' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return palettes[Math.abs(hash) % palettes.length];
+};
+
+const getInitials = (name) => {
+  const parts = name.split(' ');
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+};
+
+function MiniRadialProgress({ value, color = "var(--primary)" }) {
+  const radius = 20;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
+  return (
+    <div style={{ position: 'relative', width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+        <circle 
+          cx="24" cy="24" r={radius} 
+          stroke="var(--border-default)" strokeWidth="4" fill="none" 
+        />
+        <circle 
+          cx="24" cy="24" r={radius} 
+          stroke={color} strokeWidth="4" fill="none" 
+          strokeDasharray={circumference} 
+          strokeDashoffset={strokeDashoffset} 
+          strokeLinecap="round" 
+        />
+      </svg>
+      <div style={{ position: 'absolute', fontSize: '11px', fontWeight: 800, color: 'var(--text-primary)' }}>
+        {value}%
+      </div>
+    </div>
+  );
+}
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -228,9 +275,16 @@ export default function FarmerDashboard() {
               </div>
 
               <div className="advisor-card-list">
-                {cropAdvisory.map(item => (
+                {cropAdvisory.map(item => {
+                  const color = getCropColor(item.crop);
+                  return (
                   <div key={item.advisory_id} className="dash-info-card advisor-card">
-                    <div className="advisor-card-icon">{item.icon}</div>
+                    <div className="advisor-card-icon" style={{ background: 'transparent' }}>
+                      <MiniRadialProgress 
+                        value={parseInt(item.roi_estimate.replace(/[^0-9]/g, '')) || 0} 
+                        color={color.text} 
+                      />
+                    </div>
                     <div className="advisor-card-content">
                       <div className="advisor-card-header">
                         <h3 className="advisor-card-title">{item.crop}</h3>
@@ -250,7 +304,8 @@ export default function FarmerDashboard() {
                     </div>
                     <button className="btn btn-outline btn-sm">Select</button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -291,7 +346,7 @@ export default function FarmerDashboard() {
                 <div className="dash-chart-title">52-Week SARIMA Forecast — {prediction.crop_name}</div>
                 <div className="dash-chart-meta">
                   <span className="dash-chart-model">{prediction.model} · 95% CI</span>
-                  <span className="badge badge-amber">⚡ Lean: Weeks 21–29, 49–52</span>
+                  <span className="badge badge-amber"><Zap size={12} style={{ display: 'inline', marginRight: 4 }} /> Lean: Weeks 21–29, 49–52</span>
                 </div>
                 <ResponsiveContainer width="100%" height={260}>
                   <AreaChart data={prediction.forecast} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -359,7 +414,7 @@ export default function FarmerDashboard() {
               {harvestAlerts.map(alert => (
                 <div key={alert.alert_id} className="dash-alert-card">
                   <div className="dash-alert-layout">
-                    <div className="dash-alert-icon">🧅</div>
+                    <div className="dash-alert-icon"><Bell size={24} color="var(--primary)" /></div>
                     <div className="advisor-card-content">
                       <div className="dash-alert-header">
                         <h3 className="dash-alert-title">{alert.crop} — {alert.alert_id}</h3>
@@ -377,7 +432,7 @@ export default function FarmerDashboard() {
                   </div>
                   <div className="dash-alert-actions">
                     <button className="btn btn-outline btn-sm">Reschedule</button>
-                    <button className="btn btn-primary">✓ Confirm Harvest</button>
+                    <button className="btn btn-primary"><CheckCircle size={16} style={{ display: 'inline', marginRight: 8 }} /> Confirm Harvest</button>
                   </div>
                 </div>
               ))}
@@ -447,7 +502,7 @@ export default function FarmerDashboard() {
                     disabled={!allChecked}
                     onClick={() => setDispatchReady(true)}
                   >
-                    {allChecked ? '✓ Ready for Dispatch' : 'Complete All Required Items'}
+                    {allChecked ? <><CheckCircle size={16} style={{ display: 'inline', marginRight: 8 }} /> Ready for Dispatch</> : 'Complete All Required Items'}
                   </button>
 
                   {dispatchReady && (
@@ -460,12 +515,12 @@ export default function FarmerDashboard() {
 
                 <div className="advisor-card-list">
                   {[
-                    { title: '📦 Crate Standard', text: 'Ventilated plastic crates (Type-3 HDPE), minimum 12% open area. Max: 25 kg/crate.' },
-                    { title: '🌡️ Temperature', text: 'Post-harvest: 18–24°C. Cold chain transit: 8–12°C.' },
-                    { title: '🏆 Compliance', text: 'Your score: 98/100. >95 = premium buyer placement.' },
+                    { icon: <Package size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Crate Standard', text: 'Ventilated plastic crates (Type-3 HDPE), minimum 12% open area. Max: 25 kg/crate.' },
+                    { icon: <Thermometer size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Temperature', text: 'Post-harvest: 18–24°C. Cold chain transit: 8–12°C.' },
+                    { icon: <ShieldCheck size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Compliance', text: 'Your score: 98/100. >95 = premium buyer placement.' },
                   ].map(c => (
                     <div key={c.title} className="dash-info-card dash-info-item">
-                      <h4 className="dash-info-item-title">{c.title}</h4>
+                      <h4 className="dash-info-item-title" style={{ display: 'flex', alignItems: 'center' }}>{c.icon}{c.title}</h4>
                       <p className="advisor-banner-text">{c.text}</p>
                     </div>
                   ))}
@@ -490,9 +545,9 @@ export default function FarmerDashboard() {
                   <thead><tr><th>Crop</th><th>Quantity</th><th>Price</th><th>Status</th><th>Harvest Date</th><th></th></tr></thead>
                   <tbody>
                     {[
-                      { name: '🧅 Big Onion', qty: '2,500 kg', price: '₨ 210/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 10, 2026' },
-                      { name: '🫑 Capsicum', qty: '600 kg', price: '₨ 320/kg', status: 'Harvest Triggered', statusClass: 'status-confirmed', harvest: 'Jul 8, 2026' },
-                      { name: '🥕 Carrot', qty: '1,200 kg', price: '₨ 145/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 12, 2026' },
+                      { name: 'Big Onion', qty: '2,500 kg', price: '₨ 210/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 10, 2026' },
+                      { name: 'Capsicum', qty: '600 kg', price: '₨ 320/kg', status: 'Harvest Triggered', statusClass: 'status-confirmed', harvest: 'Jul 8, 2026' },
+                      { name: 'Carrot', qty: '1,200 kg', price: '₨ 145/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 12, 2026' },
                     ].map(l => (
                       <tr key={l.name}>
                         <td className="fw-600">{l.name}</td>

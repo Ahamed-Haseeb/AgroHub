@@ -72,10 +72,6 @@ const cropListingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    icon: {
-      type: String,
-      default: "🌱",
-    },
     rating: {
       type: Number,
       default: 0,

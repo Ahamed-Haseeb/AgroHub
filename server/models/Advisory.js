@@ -28,10 +28,6 @@ const cropAdvisorySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    icon: {
-      type: String,
-      default: "🌱",
-    },
     urgency: {
       type: String,
       required: true,

@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Leaf, TrendingUp, Truck, Shield,
-  BarChart2, Zap, CheckCircle, Globe, Users
+  BarChart2, Zap, CheckCircle, Globe, Users,
+  AlertTriangle, Sprout, ShoppingCart, Bell
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats } from '../api/client';
@@ -36,7 +37,7 @@ function StatCard({ stat, visible }) {
 
   return (
     <div className="stat-card" style={{ animation: visible ? 'fadeInUp 0.6s ease both' : 'none' }}>
-      <div style={{ fontSize: 28, marginBottom: 'var(--space-2)' }}>{stat.icon}</div>
+
       <div className="stat-value">
         {prefix}{isNaN(parseFloat(stat.value.replace(/[^0-9.]/g, ''))) ? stat.value : count.toLocaleString('en-LK') + suffix}
         {label2 && <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>{label2}</span>}
@@ -72,10 +73,10 @@ const features = [
 ];
 
 const howItWorks = [
-  { step: '01', title: 'Plant Smart',     desc: 'AI analyzes national import gaps and recommends the highest-yield, highest-price crops for your region.', icon: '🌱' },
-  { step: '02', title: 'Buyer Orders',    desc: 'Urban consumer or exporter places an advance order and payment is confirmed on AgroHub marketplace.',     icon: '🛒' },
-  { step: '03', title: 'Harvest Alert',   desc: 'JIT engine matches order to your farm and sends a push notification: "Harvest Window: July 10–11."',       icon: '🔔' },
-  { step: '04', title: 'Deliver Fresh',   desc: 'Produce in ventilated crates reaches the buyer within 24–72 hours. Zero intermediaries. Maximum price.',    icon: '🚚' },
+  { step: '01', title: 'Plant Smart',     desc: 'AI analyzes national import gaps and recommends the highest-yield, highest-price crops for your region.', icon: <Sprout size={32} strokeWidth={1.5} /> },
+  { step: '02', title: 'Buyer Orders',    desc: 'Urban consumer or exporter places an advance order and payment is confirmed on AgroHub marketplace.',     icon: <ShoppingCart size={32} strokeWidth={1.5} /> },
+  { step: '03', title: 'Harvest Alert',   desc: 'JIT engine matches order to your farm and sends a push notification: "Harvest Window: July 10–11."',       icon: <Bell size={32} strokeWidth={1.5} /> },
+  { step: '04', title: 'Deliver Fresh',   desc: 'Produce in ventilated crates reaches the buyer within 24–72 hours. Zero intermediaries. Maximum price.',    icon: <Truck size={32} strokeWidth={1.5} /> },
 ];
 
 export default function LandingPage() {
@@ -104,7 +105,6 @@ export default function LandingPage() {
         <div className="container hero-content">
           <div style={{ maxWidth: 740 }}>
             <div className="hero-eyebrow">
-              <span style={{ fontSize: 18 }}>🇱🇰</span>
               Sri Lanka's Direct Farm-to-Consumer Platform
             </div>
 
@@ -321,7 +321,7 @@ export default function LandingPage() {
             padding: 'var(--space-2) var(--space-5)',
             marginBottom: 'var(--space-6)'
           }}>
-            <span>⚠️</span>
+            <AlertTriangle size={18} color="var(--agro-amber-light)" />
             <span style={{ color: 'var(--agro-amber-light)', fontSize: 'var(--text-sm)', fontWeight: 600 }}>
               The Problem We're Solving
             </span>
@@ -369,7 +369,9 @@ export default function LandingPage() {
                 background: 'linear-gradient(145deg, rgba(22,163,74,0.08) 0%, var(--bg-card) 100%)',
                 border: '1px solid rgba(22,163,74,0.20)'
               }}>
-                <div style={{ fontSize: 64, marginBottom: 'var(--space-5)' }}>👨‍🌾</div>
+                <div style={{ color: 'var(--agro-green)', marginBottom: 'var(--space-5)', display: 'flex', justifyContent: 'center' }}>
+                  <Sprout size={64} strokeWidth={1.5} />
+                </div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800, marginBottom: 'var(--space-3)' }}>
                   I'm a Farmer
                 </h3>
@@ -389,7 +391,9 @@ export default function LandingPage() {
                 background: 'linear-gradient(145deg, rgba(37,99,235,0.06) 0%, var(--bg-card) 100%)',
                 border: '1px solid rgba(37,99,235,0.20)'
               }}>
-                <div style={{ fontSize: 64, marginBottom: 'var(--space-5)' }}>🛒</div>
+                <div style={{ color: '#2563eb', marginBottom: 'var(--space-5)', display: 'flex', justifyContent: 'center' }}>
+                  <ShoppingCart size={64} strokeWidth={1.5} />
+                </div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800, marginBottom: 'var(--space-3)' }}>
                   I'm a Buyer
                 </h3>

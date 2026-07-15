@@ -30,7 +30,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Awaiting Order",
     organic: false,
-    icon: "🧅",
     rating: 4.8,
     orders: 24,
     image_url: "/assets/products/big-onion.png",
@@ -51,7 +50,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Harvest Triggered",
     organic: true,
-    icon: "🍅",
     rating: 4.9,
     orders: 41,
     image_url: "/assets/products/tomato.png",
@@ -72,7 +70,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Awaiting Order",
     organic: false,
-    icon: "🥕",
     rating: 4.6,
     orders: 18,
     image_url: "/assets/products/carrot.png",
@@ -93,7 +90,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Harvest Triggered",
     organic: true,
-    icon: "🫑",
     rating: 4.7,
     orders: 33,
     image_url: "/assets/products/capsicum.png",
@@ -114,7 +110,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Awaiting Order",
     organic: false,
-    icon: "🥬",
     rating: 4.5,
     orders: 12,
     image_url: "/assets/products/leeks.png",
@@ -135,7 +130,6 @@ const cropListings = [
     packaging: "Ventilated Crate",
     jit_status: "Awaiting Order",
     organic: false,
-    icon: "🥔",
     rating: 4.4,
     orders: 9,
     image_url: "/assets/products/potato.png",
@@ -204,7 +198,6 @@ const cropAdvisory = [
     roi_estimate: "+68%",
     risk: "Medium",
     season: "Plant now for Week 20 harvest",
-    icon: "🧅",
     urgency: "high",
   },
   {
@@ -215,7 +208,6 @@ const cropAdvisory = [
     roi_estimate: "+54%",
     risk: "Low",
     season: "Ideal for dry zone planting",
-    icon: "🌶️",
     urgency: "medium",
   },
   {
@@ -226,16 +218,15 @@ const cropAdvisory = [
     roi_estimate: "+38%",
     risk: "Low",
     season: "Upcountry planting window open",
-    icon: "🥕",
     urgency: "low",
   },
 ];
 
 const platformStats = [
-  { label: "Farmers Onboarded", value: "2,847", unit: "", icon: "👨‍🌾" },
-  { label: "Waste Eliminated", value: "38%", unit: "", icon: "♻️" },
-  { label: "Avg. Price Gain", value: "+42%", unit: "", icon: "📈" },
-  { label: "LKR Saved (Farmers)", value: "₨ 18.4M", unit: "/mo", icon: "💰" },
+  { label: "Farmers Onboarded", value: "2,847", unit: "" },
+  { label: "Waste Eliminated", value: "38%", unit: "" },
+  { label: "Avg. Price Gain", value: "+42%", unit: "" },
+  { label: "LKR Saved (Farmers)", value: "₨ 18.4M", unit: "/mo" },
 ];
 
 const marketPrices = [

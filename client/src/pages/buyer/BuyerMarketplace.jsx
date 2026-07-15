@@ -6,7 +6,7 @@ import {
 import {
   Search, Filter, ShoppingCart, MapPin, Star,
   Package, Truck, Clock, CheckCircle, ArrowRight,
-  TrendingUp, Leaf, ChevronDown, X
+  TrendingUp, Leaf, ChevronDown, X, ShieldCheck
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCrops, fetchPrediction, fetchTraceability } from '../../api/client';
@@ -46,7 +46,7 @@ function ProductCard({ listing, onSelect }) {
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: statusStyle.dot, display: 'inline-block' }} />
           {listing.jit_status}
         </span>
-        {listing.organic && <span className="badge badge-green">🌿 Organic</span>}
+        {listing.organic && <span className="badge badge-green"><Leaf size={12} style={{ display: 'inline', marginRight: 4 }} /> Organic</span>}
       </div>
 
 
@@ -228,7 +228,7 @@ function TraceabilityPanel({ steps = [] }) {
   if (!steps.length) return null;
   return (
     <div className="chart-container" style={{ height: 'fit-content' }}>
-      <div className="chart-title" style={{ marginBottom: 'var(--space-2)' }}>📍 Order Traceability</div>
+      <div className="chart-title" style={{ marginBottom: 'var(--space-2)' }}><MapPin size={16} style={{ display: 'inline', marginRight: 6 }} /> Order Traceability</div>
       <div className="chart-subtitle">Big Onion · Order #ALERT001</div>
       <div className="timeline" style={{ marginTop: 'var(--space-5)' }}>
         {steps.map((step, i) => {
@@ -304,7 +304,7 @@ export default function BuyerMarketplace() {
           }}>
             <div>
               <div className="hero-eyebrow" style={{ animation: 'none', display: 'inline-flex', marginBottom: 'var(--space-3)' }}>
-                🛒 D2C Marketplace
+                <ShoppingCart size={18} style={{ display: 'inline', marginRight: 6 }} /> D2C Marketplace
               </div>
               <h1 style={{
                 fontFamily: 'var(--font-display)', fontSize: 'var(--text-4xl)',
@@ -370,7 +370,7 @@ export default function BuyerMarketplace() {
                 className={`chip ${activeCategory === cat ? 'active' : ''}`}
                 onClick={() => setCategory(cat)}
               >
-                {cat === 'All' ? '🌾' : cat === 'Vegetables' ? '🥦' : cat === 'Root Crops' ? '🥕' : cat === 'Fruits' ? '🍎' : '🌿'} {cat}
+                {cat}
               </button>
             ))}
           </div>
@@ -418,7 +418,9 @@ export default function BuyerMarketplace() {
 
             {filtered.length === 0 && (
               <div style={{ textAlign: 'center', padding: 'var(--space-16)', color: 'var(--text-muted)' }}>
-                <div style={{ fontSize: 48, marginBottom: 'var(--space-4)' }}>🔍</div>
+                <div style={{ marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'center' }}>
+                  <Search size={48} strokeWidth={1} color="var(--border-default)" />
+                </div>
                 <p>No listings found for "{search}"</p>
               </div>
             )}
@@ -468,7 +470,7 @@ export default function BuyerMarketplace() {
 
             <div className="card" style={{ background: 'linear-gradient(145deg, rgba(22,163,74,0.08), var(--bg-card))' }}>
               <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-4)', fontSize: 'var(--text-base)' }}>
-                🛡️ Why Buy Direct?
+                <ShieldCheck size={18} style={{ display: 'inline', marginRight: 6, color: 'var(--agro-green-light)' }} /> Why Buy Direct?
               </h4>
               {[
                 ['Fresh harvest guarantee', '24–72hr delivery'],
