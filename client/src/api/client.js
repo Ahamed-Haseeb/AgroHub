@@ -57,4 +57,21 @@ export const fetchTraceability = async (orderId) => {
   return data;
 };
 
+export const loginUser = async (credentials) => {
+  const { data } = await api.post("/auth/login", credentials);
+  return data;
+};
+
+export const registerUser = async (userData) => {
+  const { data } = await api.post("/auth/register", userData);
+  return data;
+};
+
+export const fetchCurrentUser = async (token) => {
+  const { data } = await api.get("/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return data;
+};
+
 export default api;

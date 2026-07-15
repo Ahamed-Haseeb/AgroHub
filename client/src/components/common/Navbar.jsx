@@ -40,7 +40,7 @@ export default function Navbar({ cartCount = 3 }) {
             </div>
 
             <div className="navbar-actions">
-              <Link to="/" className="navbar-account">
+              <Link to="/login" className="navbar-account">
                 <span className="navbar-account-greeting">Hello, Sign in</span>
                 <span className="navbar-account-label">Account</span>
               </Link>

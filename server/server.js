@@ -9,6 +9,7 @@ import aiRoutes from "./routes/aiRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
 import marketRoutes from "./routes/marketRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/market", marketRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/auth", authRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({

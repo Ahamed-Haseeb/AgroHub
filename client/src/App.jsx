@@ -4,12 +4,16 @@ import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import Storefront from './pages/Storefront';
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/farmer" element={<FarmerDashboard />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route
           path="*"
           element={

@@ -19,6 +19,7 @@
 @import './layout/footer.css';
 @import './layout/dashboard.css';
 @import './layout/storefront.css';
+@import './layout/auth.css';
 
 /* Shared */
 @import './shared/animations.css';
