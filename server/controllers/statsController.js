@@ -1,7 +1,6 @@
 import PlatformStat from "../models/Stat.js";
 
 /**
- * @desc    Get platform-wide stats for the landing page
  * @route   GET /api/stats
  * @access  Public
  */

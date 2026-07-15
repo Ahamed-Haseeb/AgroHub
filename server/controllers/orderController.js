@@ -1,6 +1,5 @@
 import Traceability from "../models/Traceability.js";
 
-// @desc    Get traceability steps for an order
 // @route   GET /api/orders/:id/traceability
 // @access  Public
 export const getOrderTraceability = async (req, res) => {

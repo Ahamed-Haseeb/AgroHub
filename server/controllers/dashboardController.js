@@ -3,7 +3,6 @@ import HarvestAlert from "../models/HarvestAlert.js";
 import CropAdvisory from "../models/Advisory.js";
 
 /**
- * @desc    Get active orders for the farmer dashboard
  * @route   GET /api/dashboard/orders
  * @access  Public (auth to be added later)
  */
@@ -17,7 +16,6 @@ export const getOrders = async (req, res) => {
 };
 
 /**
- * @desc    Get harvest alerts for the farmer
  * @route   GET /api/dashboard/alerts
  * @access  Public (auth to be added later)
  */
@@ -31,7 +29,6 @@ export const getAlerts = async (req, res) => {
 };
 
 /**
- * @desc    Get crop advisory recommendations
  * @route   GET /api/dashboard/advisory
  * @access  Public
  */

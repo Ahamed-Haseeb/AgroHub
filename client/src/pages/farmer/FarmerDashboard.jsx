@@ -56,7 +56,7 @@ export default function FarmerDashboard() {
   const [dispatchReady, setDispatchReady] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ─── API Data Fetching ───────────────────────────────
+
   const { data: prediction } = useQuery({
     queryKey: ['prediction', selectedCrop],
     queryFn: () => fetchPrediction(selectedCrop),
@@ -98,7 +98,7 @@ export default function FarmerDashboard() {
 
   return (
     <>
-      {/* Mobile header */}
+
       <div className="dash-mobile-header">
         <span><Leaf size={18} /> AgroHub</span>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="dash-mobile-menu-btn">
@@ -141,7 +141,7 @@ export default function FarmerDashboard() {
         </aside>
 
         <main className="dashboard-main">
-          {/* OVERVIEW */}
+
           {activeTab === 'overview' && (
             <div className="animate-fade-in">
               <div className="dash-header">
@@ -211,7 +211,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* CROPS */}
+
           {activeTab === 'advisor' && (
             <div className="animate-fade-in">
               <h1 className="dash-page-title">Crop Advisor</h1>
@@ -255,7 +255,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* ANALYTICS */}
+
           {activeTab === 'forecast' && (
             <div className="animate-fade-in">
               {!prediction ? (
@@ -345,7 +345,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* ORDERS */}
+
           {activeTab === 'alerts' && (
             <div className="animate-fade-in">
               <h1 className="dash-page-title">Orders</h1>
@@ -402,7 +402,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* INVENTORY */}
+
           {activeTab === 'packaging' && (
             <div className="animate-fade-in">
               <h1 className="dash-page-title">Inventory & Packaging</h1>
@@ -474,7 +474,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* MARKET */}
+
           {activeTab === 'my-listings' && (
             <div className="animate-fade-in">
               <div className="dash-header dash-header-spaced">
@@ -509,7 +509,7 @@ export default function FarmerDashboard() {
             </div>
           )}
 
-          {/* SETTINGS */}
+
           {activeTab === 'settings' && (
             <div className="animate-fade-in">
               <h1 className="dash-page-title">Settings</h1>

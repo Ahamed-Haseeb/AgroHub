@@ -1,17 +1,11 @@
 import axios from "axios";
 
-/**
- * Axios instance pre-configured with the Express backend base URL.
- * All API calls throughout the frontend should use this instance.
- */
 const api = axios.create({
   baseURL: "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-// ─── Crop Listings (Storefront) ─────────────────────────
 
 export const fetchCrops = async (params = {}) => {
   const { data } = await api.get("/crops", { params });
@@ -22,8 +16,6 @@ export const fetchCropById = async (id) => {
   const { data } = await api.get(`/crops/${id}`);
   return data;
 };
-
-// ─── Dashboard ──────────────────────────────────────────
 
 export const fetchOrders = async () => {
   const { data } = await api.get("/dashboard/orders");
@@ -40,8 +32,6 @@ export const fetchAdvisory = async () => {
   return data;
 };
 
-// ─── AI Predictions ─────────────────────────────────────
-
 export const fetchPrediction = async (cropId) => {
   const { data } = await api.get(`/ai/predictions/${cropId}`);
   return data;
@@ -51,8 +41,6 @@ export const fetchAvailableCrops = async () => {
   const { data } = await api.get("/ai/crops");
   return data;
 };
-
-// ─── Platform Stats & Market ─────────────────────────────
 
 export const fetchStats = async () => {
   const { data } = await api.get("/stats");

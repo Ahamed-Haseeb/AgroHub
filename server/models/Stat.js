@@ -1,12 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * PlatformStat Schema
- * Maps to the frontend's `platformStats` array in LandingPage.jsx.
- *
- * Frontend consumes:
- *   label, value, unit, icon
- */
 const platformStatSchema = new mongoose.Schema(
   {
     label: {

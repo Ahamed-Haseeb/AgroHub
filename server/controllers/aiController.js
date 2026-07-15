@@ -1,16 +1,3 @@
-/**
- * AI Predictions Controller
- *
- * Serves mock SARIMA/GARCH prediction data until the Python AI Bridge
- * microservice is built. The data structure matches mockPrediction from
- * the frontend's mockData.js exactly.
- *
- * @desc    Get AI price prediction for a crop
- * @route   GET /api/ai/predictions/:cropId
- * @access  Public
- */
-
-// Mock prediction data — exact copy of frontend's mockPrediction
 const mockPredictions = {
   ONION_BIG_LK: {
     crop_id: "ONION_BIG_LK",
@@ -76,7 +63,6 @@ const mockPredictions = {
   },
 };
 
-// Available crops list (matches frontend's availableCrops)
 const availableCrops = [
   { id: "ONION_BIG_LK", name: "Big Onion", origin: "Dambulla", category: "Vegetables" },
   { id: "TOMATO_LK", name: "Tomato", origin: "Nuwara Eliya", category: "Vegetables" },
@@ -90,8 +76,7 @@ export const getPrediction = async (req, res) => {
   try {
     const { cropId } = req.params;
 
-    // For now, return the Big Onion mock for all crops
-    // Once the Python AI Bridge is built, this will proxy to FastAPI
+    // TODO: proxy to Python FastAPI service when ready
     const prediction = mockPredictions[cropId] || {
       ...mockPredictions["ONION_BIG_LK"],
       crop_id: cropId,

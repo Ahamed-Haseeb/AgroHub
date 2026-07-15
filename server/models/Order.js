@@ -1,12 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * Order Schema
- * Maps to the frontend's `activeOrders` table in FarmerDashboard.jsx.
- *
- * Frontend consumes:
- *   id (order_number), crop, quantity, status, statusClass (status_class), price
- */
 const orderSchema = new mongoose.Schema(
   {
     order_number: {

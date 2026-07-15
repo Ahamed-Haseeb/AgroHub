@@ -1,6 +1,5 @@
 import MarketPrice from "../models/MarketPrice.js";
 
-// @desc    Get all market prices
 // @route   GET /api/market/prices
 // @access  Public
 export const getMarketPrices = async (req, res) => {

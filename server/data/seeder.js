@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import connectDB from "../config/db.js";
 
-// Models
 import CropListing from "../models/Crop.js";
 import Order from "../models/Order.js";
 import HarvestAlert from "../models/HarvestAlert.js";
@@ -13,7 +12,6 @@ import Traceability from "../models/Traceability.js";
 
 dotenv.config();
 
-// ─── Seed Data (mirrors client/src/data/mockData.js) ─────
 
 const cropListings = [
   {
@@ -255,13 +253,11 @@ const traceabilitySteps = [
   { order_id: 'ALERT001', order_index: 5, step: "Cold Chain Pickup", date: "Jul 11, 2026", location: "Dambulla Farm", done: false },
 ];
 
-// ─── Import / Destroy Logic ──────────────────────────────
 
 const importData = async () => {
   try {
     await connectDB();
 
-    // Clear existing data
     await CropListing.deleteMany();
     await Order.deleteMany();
     await HarvestAlert.deleteMany();
@@ -270,7 +266,6 @@ const importData = async () => {
     await MarketPrice.deleteMany();
     await Traceability.deleteMany();
 
-    // Insert seed data
     await CropListing.insertMany(cropListings);
     await Order.insertMany(orders);
     await HarvestAlert.insertMany(harvestAlerts);
@@ -279,15 +274,15 @@ const importData = async () => {
     await MarketPrice.insertMany(marketPrices);
     await Traceability.insertMany(traceabilitySteps);
 
-    console.log("✅ Data seeded successfully!");
-    console.log(`   📦 ${cropListings.length} crop listings`);
-    console.log(`   📋 ${orders.length} orders`);
-    console.log(`   🔔 ${harvestAlerts.length} harvest alerts`);
-    console.log(`   🌱 ${cropAdvisory.length} crop advisories`);
-    console.log(`   📊 ${platformStats.length} platform stats`);
+    console.log('Data seeded:');
+    console.log(`  ${cropListings.length} crop listings`);
+    console.log(`  ${orders.length} orders`);
+    console.log(`  ${harvestAlerts.length} harvest alerts`);
+    console.log(`  ${cropAdvisory.length} crop advisories`);
+    console.log(`  ${platformStats.length} platform stats`);
     process.exit();
   } catch (error) {
-    console.error(`❌ Seeder Error: ${error.message}`);
+    console.error(`Seeder error: ${error.message}`);
     process.exit(1);
   }
 };
@@ -304,15 +299,14 @@ const destroyData = async () => {
     await MarketPrice.deleteMany();
     await Traceability.deleteMany();
 
-    console.log("🗑️  All data destroyed!");
+    console.log('All data destroyed.');
     process.exit();
   } catch (error) {
-    console.error(`❌ Destroy Error: ${error.message}`);
+    console.error(`Destroy error: ${error.message}`);
     process.exit(1);
   }
 };
 
-// CLI: npm run seed / npm run seed:destroy
 if (process.argv[2] === "--destroy") {
   destroyData();
 } else {

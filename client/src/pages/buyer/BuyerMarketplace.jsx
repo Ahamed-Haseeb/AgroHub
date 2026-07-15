@@ -11,7 +11,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { fetchCrops, fetchPrediction, fetchTraceability } from '../../api/client';
 
-// ── Price Tooltip ──
+
 function PriceTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
@@ -30,7 +30,7 @@ function PriceTooltip({ active, payload, label }) {
   );
 }
 
-// ── Product Card ──
+
 function ProductCard({ listing, onSelect }) {
   const jitColors = {
     'Harvest Triggered': { badge: 'badge-green', dot: 'var(--agro-green)' },
@@ -40,7 +40,7 @@ function ProductCard({ listing, onSelect }) {
 
   return (
     <div className="product-card" onClick={() => onSelect(listing)} id={`product-${listing.id}`}>
-      {/* Badges row */}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-3)' }}>
         <span className={`badge ${statusStyle.badge}`}>
           <span style={{ width: 5, height: 5, borderRadius: '50%', background: statusStyle.dot, display: 'inline-block' }} />
@@ -49,10 +49,10 @@ function ProductCard({ listing, onSelect }) {
         {listing.organic && <span className="badge badge-green">🌿 Organic</span>}
       </div>
 
-      {/* Emoji */}
+
       <div className="product-emoji">{listing.icon}</div>
 
-      {/* Info */}
+
       <h3 style={{
         fontFamily: 'var(--font-display)', fontWeight: 700,
         fontSize: 'var(--text-lg)', marginBottom: 'var(--space-1)'
@@ -63,7 +63,7 @@ function ProductCard({ listing, onSelect }) {
         {listing.origin}
       </div>
 
-      {/* Rating */}
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', gap: 2 }}>
           {[1,2,3,4,5].map(s => (
@@ -73,7 +73,7 @@ function ProductCard({ listing, onSelect }) {
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{listing.rating} ({listing.orders} orders)</span>
       </div>
 
-      {/* Price + Qty */}
+
       <div style={{
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'flex-end', marginBottom: 'var(--space-4)'
@@ -90,7 +90,7 @@ function ProductCard({ listing, onSelect }) {
         </div>
       </div>
 
-      {/* Footer */}
+
       <div style={{
         paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border-subtle)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
@@ -105,7 +105,7 @@ function ProductCard({ listing, onSelect }) {
   );
 }
 
-// ── Order Modal ──
+
 function OrderModal({ listing, onClose }) {
   const [qty, setQty] = useState(50);
   if (!listing) return null;
@@ -125,7 +125,7 @@ function OrderModal({ listing, onClose }) {
         width: '100%', maxWidth: 520,
         animation: 'scaleIn 0.25s ease both'
       }}>
-        {/* Header */}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-6)' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 4 }}>
@@ -144,7 +144,7 @@ function OrderModal({ listing, onClose }) {
           </button>
         </div>
 
-        {/* Details grid */}
+
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 'var(--space-3)', marginBottom: 'var(--space-6)'
@@ -164,7 +164,7 @@ function OrderModal({ listing, onClose }) {
           ))}
         </div>
 
-        {/* Quantity */}
+
         <div style={{ marginBottom: 'var(--space-5)' }}>
           <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
             Order Quantity (kg)
@@ -186,7 +186,7 @@ function OrderModal({ listing, onClose }) {
           </p>
         </div>
 
-        {/* Total */}
+
         <div style={{
           background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.20)',
           borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)',
@@ -205,7 +205,7 @@ function OrderModal({ listing, onClose }) {
           </div>
         </div>
 
-        {/* Traceability note */}
+
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
           fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-5)'
@@ -214,16 +214,16 @@ function OrderModal({ listing, onClose }) {
           This advance payment triggers the farmer's JIT Harvest Alert.
         </div>
 
-        {/* CTA */}
+
         <button id="order-place-btn" className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
-          Place Advance Order — ₨ {total.toLocaleString('en-LK')}
+          Place Advance Order - ₨ {total.toLocaleString('en-LK')}
         </button>
       </div>
     </div>
   );
 }
 
-// ── Traceability Panel ──
+
 function TraceabilityPanel({ steps = [] }) {
   if (!steps.length) return null;
   return (
@@ -264,7 +264,7 @@ function TraceabilityPanel({ steps = [] }) {
   );
 }
 
-// ── Main Page ──
+
 const categories = ['All', 'Vegetables', 'Root Crops', 'Fruits', 'Organic'];
 
 export default function BuyerMarketplace() {
@@ -291,7 +291,7 @@ export default function BuyerMarketplace() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 72 }}>
-      {/* ── MARKETPLACE HEADER ── */}
+
       <div style={{
         background: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border-subtle)',
@@ -310,14 +310,14 @@ export default function BuyerMarketplace() {
                 fontFamily: 'var(--font-display)', fontSize: 'var(--text-4xl)',
                 fontWeight: 900, marginBottom: 'var(--space-2)'
               }}>
-                Fresh. Direct.{' '}
-                <span className="gradient-text">Traceable.</span>
+                Fresh From the{' '}
+                <span className="gradient-text">Farm</span>
               </h1>
               <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-lg)' }}>
                 Farm-to-doorstep in 24–72 hours. No intermediaries. No markup chains.
               </p>
             </div>
-            {/* Cart */}
+
             <button id="buyer-cart-btn" className="btn btn-primary" style={{ position: 'relative' }}>
               <ShoppingCart size={18} />
               Cart
@@ -332,9 +332,9 @@ export default function BuyerMarketplace() {
             </button>
           </div>
 
-          {/* Search + Filters */}
+
           <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-            {/* Search */}
+
             <div style={{ position: 'relative', flex: '1 1 300px' }}>
               <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
               <input
@@ -346,7 +346,7 @@ export default function BuyerMarketplace() {
                 style={{ paddingLeft: 40 }}
               />
             </div>
-            {/* Sort */}
+
             <select
               id="marketplace-sort"
               className="input select"
@@ -361,7 +361,7 @@ export default function BuyerMarketplace() {
             </select>
           </div>
 
-          {/* Category Chips */}
+
           <div className="chip-row" style={{ marginTop: 'var(--space-4)' }}>
             {categories.map(cat => (
               <button
@@ -377,13 +377,13 @@ export default function BuyerMarketplace() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+
       <div className="container" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-16)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 'var(--space-8)' }}>
 
-          {/* Left — Product Grid */}
+
           <div>
-            {/* Results count */}
+
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               marginBottom: 'var(--space-5)'
@@ -401,7 +401,7 @@ export default function BuyerMarketplace() {
               </div>
             </div>
 
-            {/* Product Grid */}
+
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
@@ -424,13 +424,13 @@ export default function BuyerMarketplace() {
             )}
           </div>
 
-          {/* Right — Sidebar panels */}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-            {/* Price Trend Mini Chart */}
+
             <div className="chart-container">
               <div className="chart-title" style={{ fontSize: 'var(--text-base)', marginBottom: 4 }}>
                 <TrendingUp size={14} style={{ display: 'inline', marginRight: 6, color: 'var(--agro-green-light)' }} />
-                Big Onion — Price Trend
+                Big Onion - Price Trend
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }}>
                 SARIMA 12-week forecast
@@ -457,15 +457,15 @@ export default function BuyerMarketplace() {
                 )}
               </ResponsiveContainer>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
-                <span>Current: <strong style={{ color: 'var(--agro-green-light)' }}>₨ 210</strong></span>
-                <span>12-wk avg: <strong style={{ color: 'var(--text-primary)' }}>₨ 231</strong></span>
+                <span>Current: <strong style={{ color: 'var(--agro-green-light)' }}>₨ {prediction?.forecast?.[0]?.price ?? '-'}</strong></span>
+                <span>12-wk avg: <strong style={{ color: 'var(--text-primary)' }}>₨ {prediction ? Math.round(prediction.forecast.slice(0, 12).reduce((s, w) => s + w.price, 0) / 12) : '-'}</strong></span>
               </div>
             </div>
 
-            {/* Traceability */}
+
             <TraceabilityPanel steps={traceabilitySteps} />
 
-            {/* Why AgroHub */}
+
             <div className="card" style={{ background: 'linear-gradient(145deg, rgba(22,163,74,0.08), var(--bg-card))' }}>
               <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-4)', fontSize: 'var(--text-base)' }}>
                 🛡️ Why Buy Direct?
@@ -494,7 +494,7 @@ export default function BuyerMarketplace() {
         </div>
       </div>
 
-      {/* ── ORDER MODAL ── */}
+
       {selectedItem && (
         <OrderModal listing={selectedItem} onClose={() => setSelectedItem(null)} />
       )}

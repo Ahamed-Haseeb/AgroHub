@@ -7,7 +7,7 @@ const traceabilitySchema = new mongoose.Schema(
     date: { type: String, required: true },
     location: { type: String, required: true },
     done: { type: Boolean, default: false },
-    order_index: { type: Number, required: true }, // To sort steps sequentially
+    order_index: { type: Number, required: true },
   },
   { timestamps: true }
 );

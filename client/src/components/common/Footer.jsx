@@ -17,7 +17,7 @@ export default function Footer() {
               <span>AgroHub</span>
             </div>
             <p className="footer-brand-desc">
-              Eliminating Sri Lanka's 30-40% post-harvest waste through AI-powered direct-to-consumer agriculture and JIT logistics.
+              AgroHub connects farmers directly to buyers. We use price forecasts and local logistics to cut post-harvest waste from 40% to near zero.
             </p>
             <div className="footer-socials">
               {socialIcons.map((Icon, i) => (
@@ -52,7 +52,6 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <p>© 2026 AgroHub (Pvt) Ltd. All rights reserved. 🇱🇰</p>
-          <p>Powered by FastAPI · SARIMA · GARCH</p>
         </div>
       </div>
     </footer>

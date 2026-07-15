@@ -1,14 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * CropListing Schema
- * Maps 1:1 to the frontend's ProductCard.jsx props and mockData.js cropListings.
- *
- * Frontend consumes:
- *   id, crop_name, farmer_name, origin, district, quantity_kg, available_kg,
- *   price_per_kg, harvest_date, delivery_days, category, grade, packaging,
- *   jit_status, organic, icon, rating, orders, image_url
- */
 const cropListingSchema = new mongoose.Schema(
   {
     listing_id: {

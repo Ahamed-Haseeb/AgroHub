@@ -1,12 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * CropAdvisory Schema
- * Maps to the frontend's `cropAdvisory` array in FarmerDashboard.jsx.
- *
- * Frontend consumes:
- *   id (advisory_id), crop, reason, roi_estimate, risk, season, icon, urgency
- */
 const cropAdvisorySchema = new mongoose.Schema(
   {
     advisory_id: {

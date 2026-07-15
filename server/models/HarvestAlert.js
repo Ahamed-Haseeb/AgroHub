@@ -1,13 +1,5 @@
 import mongoose from "mongoose";
 
-/**
- * HarvestAlert Schema
- * Maps to the frontend's `harvestAlerts` array in FarmerDashboard.jsx.
- *
- * Frontend consumes:
- *   id (alert_id), crop, buyer, quantity_kg, order_value_lkr,
- *   harvest_window, status, message
- */
 const harvestAlertSchema = new mongoose.Schema(
   {
     alert_id: {
