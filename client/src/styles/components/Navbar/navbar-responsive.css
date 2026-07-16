@@ -1,0 +1,92 @@
+/* Tablet */
+@media (max-width: 1024px) {
+  .navbar-inner { padding: 0 var(--sp-4); }
+  .navbar-row { gap: 16px; height: 56px; }
+  .navbar-search { max-width: 400px; }
+  .navbar-search-select { min-width: 70px; font-size: 12px; padding: 0 8px; }
+  .navbar-actions { gap: 16px; }
+  .navbar-categories-inner {
+    padding: 0 var(--sp-4);
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .navbar-cat-link { scroll-snap-align: start; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .navbar-hamburger { display: flex; }
+  .navbar-mobile-search-btn { display: flex; }
+  .navbar-account-greeting { display: none; }
+  .navbar-account-text { display: none; }
+  .navbar-account-icon { display: block; }
+  .navbar-cart-label { display: none; }
+  .navbar-actions { gap: 4px; }
+
+  .navbar-account {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+  .navbar-account:active { background: var(--bg-surface); }
+
+  .navbar-cart {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    position: relative;
+  }
+  .navbar-cart:active { background: var(--bg-surface); }
+
+  .navbar-cart-badge {
+    top: 2px;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+
+  .navbar-account-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .navbar-search { display: none; }
+  .navbar-row { height: 52px; gap: 8px; }
+  .navbar-inner { padding: 0 var(--sp-3); }
+  .navbar-categories-inner {
+    gap: 12px;
+    padding: 0 var(--sp-3);
+    height: 40px;
+  }
+  .navbar-cat-link { font-size: 12px; }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .navbar-hamburger,
+  .navbar-mobile-search-btn,
+  .navbar-account,
+  .navbar-cart {
+    width: 36px;
+    height: 36px;
+  }
+  .navbar-row { gap: 8px; }
+  .navbar-logo span { font-size: 16px; }
+}
+
+/* Safe area insets */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .navbar {
+    padding-top: env(safe-area-inset-top);
+  }
+}

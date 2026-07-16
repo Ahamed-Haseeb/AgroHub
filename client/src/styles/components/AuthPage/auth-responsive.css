@@ -1,0 +1,34 @@
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-brand-panel { display: none; }
+  .auth-form-panel { padding: var(--sp-5) var(--sp-4); }
+  .auth-heading { font-size: 24px; }
+  .auth-field-row { grid-template-columns: 1fr; }
+  .auth-role-grid { gap: var(--sp-3); }
+}
+
+/* Small mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .auth-heading { font-size: 22px; }
+  .auth-subheading { font-size: 13px; }
+  .auth-role-grid { grid-template-columns: 1fr; }
+  .auth-steps { gap: var(--sp-2); }
+  .auth-step { font-size: 11px; }
+  .auth-step-line { width: 20px; }
+}
+
+/* Landscape Phone Fixes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .auth-page { min-height: auto; }
+  .auth-form-panel { padding: var(--sp-4); }
+  .auth-heading { font-size: 20px; margin-bottom: var(--sp-1); }
+  .auth-subheading { margin-bottom: var(--sp-4); }
+}
+
+/* Safe Area Insets (Notched phones) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .auth-form-panel {
+    padding-bottom: max(var(--sp-8), env(safe-area-inset-bottom));
+  }
+}

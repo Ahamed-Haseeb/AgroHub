@@ -426,18 +426,3 @@
   background: var(--primary);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .auth-page {
-    grid-template-columns: 1fr;
-  }
-  .auth-brand-panel {
-    display: none;
-  }
-  .auth-form-panel {
-    padding: var(--sp-6) var(--sp-4);
-  }
-  .auth-field-row {
-    grid-template-columns: 1fr;
-  }
-}

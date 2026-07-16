@@ -1,11 +1,13 @@
-import { useState  } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Search, ShoppingCart } from 'lucide-react';
+import { Leaf, Search, ShoppingCart, Menu, X, User } from 'lucide-react';
 
 const categories = ["Today's Harvest", 'Best Sellers', 'Organic', 'Root Crops', 'Spices', 'Export Grade', 'Deals'];
 
 export default function Navbar({ cartCount = 3 }) {
   const [category, setCategory] = useState('All');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header>
@@ -40,9 +42,20 @@ export default function Navbar({ cartCount = 3 }) {
             </div>
 
             <div className="navbar-actions">
+              <button
+                className="navbar-mobile-search-btn"
+                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+
               <Link to="/login" className="navbar-account">
                 <span className="navbar-account-greeting">Hello, Sign in</span>
-                <span className="navbar-account-label">Account</span>
+                <span className="navbar-account-label">
+                  <User size={18} className="navbar-account-icon" />
+                  <span className="navbar-account-text">Account</span>
+                </span>
               </Link>
 
               <Link to="/" className="navbar-cart">
@@ -52,10 +65,34 @@ export default function Navbar({ cartCount = 3 }) {
                   <span className="navbar-cart-badge">{cartCount}</span>
                 )}
               </Link>
+
+              <button
+                className="navbar-hamburger"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
             </div>
           </div>
         </div>
       </nav>
+
+      {mobileSearchOpen && (
+        <div className="navbar-mobile-search">
+          <div className="navbar-mobile-search-inner">
+            <input
+              type="text"
+              className="auth-input"
+              placeholder="Search fresh produce..."
+              autoFocus
+            />
+            <button className="btn btn-primary btn-sm" onClick={() => setMobileSearchOpen(false)}>
+              <Search size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="navbar-categories">
         <div className="navbar-categories-inner">
@@ -64,6 +101,40 @@ export default function Navbar({ cartCount = 3 }) {
           ))}
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <>
+          <div className="navbar-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
+          <div className="navbar-mobile-menu">
+            <div className="navbar-mobile-menu-header">
+              <Link to="/" className="navbar-logo" onClick={() => setMobileMenuOpen(false)}>
+                <Leaf size={18} color="var(--primary)" />
+                <span>AgroHub</span>
+              </Link>
+              <button
+                className="navbar-hamburger"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ display: 'flex' }}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <Link to="/login" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+              <User size={18} /> Sign In / Register
+            </Link>
+            <Link to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+              <ShoppingCart size={18} /> Cart {cartCount > 0 && `(${cartCount})`}
+            </Link>
+            <hr className="navbar-mobile-divider" />
+            {categories.map(label => (
+              <Link key={label} to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                {label}
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </header>
   );
 }

@@ -162,3 +162,103 @@
   color: var(--primary);
 }
 
+/* Mobile-only elements (hidden on desktop) */
+.navbar-hamburger,
+.navbar-mobile-search-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-heading);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  transition: var(--ease);
+  flex-shrink: 0;
+}
+.navbar-hamburger:active,
+.navbar-mobile-search-btn:active {
+  background: var(--bg-surface);
+  transform: scale(0.92);
+}
+
+.navbar-account-icon { display: none; }
+
+.navbar-mobile-search {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-3) var(--sp-4);
+  animation: fadeInUp 0.2s ease both;
+}
+.navbar-mobile-search-inner {
+  display: flex;
+  gap: var(--sp-2);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.navbar-mobile-search-inner input {
+  flex: 1;
+  min-height: 42px;
+}
+
+.navbar-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: var(--z-overlay);
+  animation: fadeIn 0.15s ease both;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.navbar-mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  max-width: 85vw;
+  height: 100vh;
+  background: var(--bg-white);
+  z-index: calc(var(--z-overlay) + 1);
+  padding: var(--sp-6) 0;
+  overflow-y: auto;
+  animation: slideInRight 0.2s ease both;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-mobile-menu-header {
+  padding: 0 var(--sp-6) var(--sp-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-3);
+}
+
+.navbar-mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-6);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-heading);
+  text-decoration: none;
+  transition: var(--ease);
+  min-height: 48px;
+}
+.navbar-mobile-menu-item:active {
+  background: var(--bg-surface);
+  color: var(--primary);
+}
+
+.navbar-mobile-divider {
+  height: 1px;
+  background: var(--border);
+  border: none;
+  margin: var(--sp-3) var(--sp-6);
+}
+

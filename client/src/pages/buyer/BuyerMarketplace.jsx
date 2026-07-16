@@ -145,10 +145,7 @@ function OrderModal({ listing, onClose }) {
         </div>
 
 
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 'var(--space-3)', marginBottom: 'var(--space-6)'
-        }}>
+        <div className="buyer-modal-grid" style={{ marginBottom: 'var(--space-6)' }}>
           {[
             ['Grade', listing.grade],
             ['Packaging', listing.packaging],
@@ -349,8 +346,7 @@ export default function BuyerMarketplace() {
 
             <select
               id="marketplace-sort"
-              className="input select"
-              style={{ width: 200 }}
+              className="input select buyer-sort-select"
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
             >
@@ -379,7 +375,7 @@ export default function BuyerMarketplace() {
 
 
       <div className="container" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-16)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 'var(--space-8)' }}>
+        <div className="buyer-layout-grid">
 
 
           <div>

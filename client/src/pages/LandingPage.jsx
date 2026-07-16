@@ -192,7 +192,7 @@ export default function LandingPage() {
       <section className="section-sm" id="stats" ref={statsRef}
         style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-6)' }}>
+          <div className="landing-stats-grid">
             {platformStats.map((stat, i) => (
               <StatCard key={stat.label} stat={stat} visible={statsVisible} />
             ))}
@@ -214,7 +214,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-6)' }}>
+          <div className="landing-features-grid">
             {features.map((f, i) => (
               <div
                 key={f.title}
@@ -254,10 +254,7 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 'var(--space-6)', position: 'relative'
-          }}>
+          <div className="landing-steps-grid">
 
             <div style={{
               position: 'absolute',
@@ -361,7 +358,7 @@ export default function LandingPage() {
             <span className="section-eyebrow">Get Started</span>
             <h2 className="section-title">Choose Your Role</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-6)', maxWidth: 800, margin: '0 auto' }}>
+          <div className="landing-roles-grid">
 
             <Link to="/farmer" style={{ textDecoration: 'none' }} id="role-farmer-card">
               <div className="card" style={{
