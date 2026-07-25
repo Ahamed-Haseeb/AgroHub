@@ -262,3 +262,6 @@
   margin: var(--sp-3) var(--sp-6);
 }
 
+
+.navbar-hamburger-menu-open { display: flex; }
+

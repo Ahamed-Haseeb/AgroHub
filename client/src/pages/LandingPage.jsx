@@ -36,11 +36,11 @@ function StatCard({ stat, visible }) {
   const label2 = stat.unit;
 
   return (
-    <div className="stat-card" style={{ animation: visible ? 'fadeInUp 0.6s ease both' : 'none' }}>
+    <div className={`stat-card stat-card-animated ${visible ? '' : 'hidden'}`}>
 
       <div className="stat-value">
         {prefix}{isNaN(parseFloat(stat.value.replace(/[^0-9.]/g, ''))) ? stat.value : count.toLocaleString('en-LK') + suffix}
-        {label2 && <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>{label2}</span>}
+        {label2 && <span className="stat-card-unit">{label2}</span>}
       </div>
       <div className="stat-label">{stat.label}</div>
     </div>
@@ -103,7 +103,7 @@ export default function LandingPage() {
         <div className="hero-orb hero-orb-3" />
 
         <div className="container hero-content">
-          <div style={{ maxWidth: 740 }}>
+          <div className="hero-content-inner">
             <div className="hero-eyebrow">
               Sri Lanka's Direct Farm-to-Consumer Platform
             </div>
@@ -113,13 +113,10 @@ export default function LandingPage() {
               From Farm to{' '}
               <span className="gradient-text">You</span>,<br />
               Without the{' '}
-              <span style={{
-                position: 'relative',
-                display: 'inline-block'
-              }}>
+              <span className="hero-underline-wrap">
                 Middleman
                 <svg
-                  style={{ position: 'absolute', bottom: -6, left: 0, width: '100%', height: 6 }}
+                  className="hero-underline-svg"
                   viewBox="0 0 300 6" preserveAspectRatio="none"
                 >
                   <path d="M0,3 Q75,0 150,3 Q225,6 300,3" stroke="#16a34a" strokeWidth="2.5" fill="none" opacity="0.7" />
@@ -128,13 +125,13 @@ export default function LandingPage() {
             </h1>
 
             <p className="hero-subtitle">
-              Sri Lanka loses <strong style={{ color: 'var(--agro-amber-light)' }}>30-40% of produce</strong> to
+              Sri Lanka loses <strong className="text-highlight-amber">30-40% of produce</strong> to
               post-harvest waste and middlemen. AgroHub cuts both out with price forecasting,
               just-in-time harvesting, and direct buyer-farmer orders.
             </p>
 
 
-            <div className="hero-cta" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+            <div className="hero-cta-group">
               <Link to="/farmer" className="btn btn-primary btn-xl" id="hero-farmer-cta">
                 I'm a Farmer
                 <ArrowRight size={20} />
@@ -145,20 +142,14 @@ export default function LandingPage() {
             </div>
 
 
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 'var(--space-6)',
-              marginTop: 'var(--space-10)', flexWrap: 'wrap'
-            }}>
+            <div className="hero-trust-row">
               {[
                 { icon: <CheckCircle size={15} />, text: '2,847 Farmers Onboarded' },
                 { icon: <Shield size={15} />,       text: 'Advance Payment Protected' },
                 { icon: <Truck size={15} />,        text: '24–72hr JIT Delivery' },
               ].map(({ icon, text }) => (
-                <div key={text} style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  color: 'var(--text-muted)', fontSize: 'var(--text-sm)'
-                }}>
-                  <span style={{ color: 'var(--agro-green-light)' }}>{icon}</span>
+                <div key={text} className="hero-trust-item">
+                  <span className="hero-trust-icon">{icon}</span>
                   {text}
                 </div>
               ))}
@@ -166,31 +157,18 @@ export default function LandingPage() {
           </div>
 
 
-          <div style={{
-            position: 'absolute', right: '5%', top: '50%',
-            transform: 'translateY(-50%)',
-            width: 340,
-            display: 'none' // shown via media query simulation
-          }} />
+          <div className="hero-ghost-div" />
         </div>
 
 
-        <div style={{
-          position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          gap: 8, color: 'var(--text-disabled)', fontSize: 'var(--text-xs)'
-        }}>
+        <div className="hero-scroll-indicator">
           <span>Scroll to explore</span>
-          <div style={{
-            width: 1, height: 40,
-            background: 'linear-gradient(to bottom, var(--border-default), transparent)'
-          }} />
+          <div className="hero-scroll-line" />
         </div>
       </section>
 
 
-      <section className="section-sm" id="stats" ref={statsRef}
-        style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
+      <section className="section-sm section-stats-wrapper" id="stats" ref={statsRef}>
         <div className="container">
           <div className="landing-stats-grid">
             {platformStats.map((stat, i) => (
@@ -208,7 +186,7 @@ export default function LandingPage() {
               Predict. Harvest.{' '}
               <span className="gradient-text">Deliver.</span>
             </h2>
-            <p className="section-desc" style={{ margin: '0 auto' }}>
+            <p className="section-desc section-desc-center">
               Three modules that work together: price forecasting tells farmers when to sell,
               JIT alerts tell them when to harvest, and the marketplace connects them directly to buyers.
             </p>
@@ -224,17 +202,13 @@ export default function LandingPage() {
                 <div className="feature-icon">
                   {f.icon}
                 </div>
-                <div style={{ marginBottom: 'var(--space-2)' }}>
-                  <span className={`badge badge-green`} style={{ marginBottom: 'var(--space-3)' }}>
+                <div className="feature-card-icon-wrap">
+                  <span className="badge badge-green feature-card-badge">
                     {f.badge}
                   </span>
                 </div>
-                <h3 style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'var(--text-xl)', fontWeight: 700,
-                  marginBottom: 'var(--space-3)', color: 'var(--text-primary)'
-                }}>{f.title}</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: 'var(--text-sm)' }}>
+                <h3 className="feature-card-title">{f.title}</h3>
+                <p className="feature-card-desc">
                   {f.desc}
                 </p>
               </div>
@@ -243,8 +217,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="section" id="how-it-works"
-        style={{ background: 'var(--bg-surface)' }}>
+      <section className="section section-how-it-works" id="how-it-works">
         <div className="container">
           <div className="section-header text-center">
             <span className="section-eyebrow">How It Works</span>
@@ -256,44 +229,17 @@ export default function LandingPage() {
 
           <div className="landing-steps-grid">
 
-            <div style={{
-              position: 'absolute',
-              top: 36, left: '12%', right: '12%',
-              height: 1,
-              background: 'linear-gradient(90deg, var(--border-subtle), var(--border-default), var(--border-subtle))',
-              zIndex: 0
-            }} />
+            <div className="steps-connector" />
 
             {howItWorks.map((item, i) => (
-              <div key={item.step}
-                style={{
-                  textAlign: 'center', position: 'relative', zIndex: 1,
-                  animation: 'fadeInUp 0.5s ease both',
-                  animationDelay: `${i * 0.12}s`
-                }}>
+              <div key={item.step} className="step-card" style={{ animationDelay: `${i * 0.12}s` }}>
 
-                <div style={{
-                  width: 72, height: 72,
-                  borderRadius: '50%',
-                  background: 'var(--bg-card)',
-                  border: '2px solid var(--border-default)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 32, margin: '0 auto var(--space-5)',
-                  transition: 'var(--transition-spring)',
-                  boxShadow: 'var(--shadow-md)'
-                }}>
+                <div className="step-icon-wrap">
                   {item.icon}
                 </div>
-                <div style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 800,
-                  fontSize: 'var(--text-sm)', color: 'var(--agro-green)',
-                  marginBottom: 'var(--space-2)', letterSpacing: '0.1em'
-                }}>{item.step}</div>
-                <h3 style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 700,
-                  fontSize: 'var(--text-lg)', marginBottom: 'var(--space-3)'
-                }}>{item.title}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
+                <div className="step-number">{item.step}</div>
+                <h3 className="step-title">{item.title}</h3>
+                <p className="step-desc">
                   {item.desc}
                 </p>
               </div>
@@ -303,44 +249,24 @@ export default function LandingPage() {
       </section>
 
 
-      <section style={{
-        padding: 'var(--space-20) 0',
-        background: 'linear-gradient(135deg, rgba(22,163,74,0.08) 0%, rgba(5,150,105,0.05) 100%)',
-        borderTop: '1px solid var(--border-subtle)',
-        borderBottom: '1px solid var(--border-subtle)'
-      }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 'var(--space-3)',
-            background: 'rgba(217,119,6,0.1)',
-            border: '1px solid rgba(217,119,6,0.25)',
-            borderRadius: 'var(--radius-full)',
-            padding: 'var(--space-2) var(--space-5)',
-            marginBottom: 'var(--space-6)'
-          }}>
+      <section className="problem-section">
+        <div className="container text-center-wrapper">
+          <div className="problem-alert-pill">
             <AlertTriangle size={18} color="var(--agro-amber-light)" />
-            <span style={{ color: 'var(--agro-amber-light)', fontSize: 'var(--text-sm)', fontWeight: 600 }}>
+            <span className="problem-alert-text">
               The Problem We're Solving
             </span>
           </div>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-            fontWeight: 900, marginBottom: 'var(--space-4)'
-          }}>
+          <h2 className="problem-headline">
             Sri Lanka loses{' '}
-            <span style={{ color: 'var(--agro-amber-light)' }}>LKR 18B+</span>{' '}
+            <span className="text-highlight-amber">LKR 18B+</span>{' '}
             annually
           </h2>
-          <p style={{
-            fontSize: 'var(--text-xl)', color: 'var(--text-secondary)',
-            maxWidth: 600, margin: '0 auto var(--space-10)',
-            lineHeight: 1.7
-          }}>
+          <p className="problem-desc">
             to post-harvest waste and middlemen markups.
             AgroHub fixes that.
           </p>
-          <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="problem-cta-group">
             <Link to="/farmer" className="btn btn-primary btn-lg" id="mid-farmer-cta">
               Join as a Farmer <ArrowRight size={18} />
             </Link>
@@ -360,44 +286,36 @@ export default function LandingPage() {
           </div>
           <div className="landing-roles-grid">
 
-            <Link to="/farmer" style={{ textDecoration: 'none' }} id="role-farmer-card">
-              <div className="card" style={{
-                padding: 'var(--space-10)', textAlign: 'center', cursor: 'pointer',
-                background: 'linear-gradient(145deg, rgba(22,163,74,0.08) 0%, var(--bg-card) 100%)',
-                border: '1px solid rgba(22,163,74,0.20)'
-              }}>
-                <div style={{ color: 'var(--agro-green)', marginBottom: 'var(--space-5)', display: 'flex', justifyContent: 'center' }}>
+            <Link to="/farmer" className="role-link" id="role-farmer-card">
+              <div className="card role-card-farmer">
+                <div className="role-icon-farmer">
                   <Sprout size={64} strokeWidth={1.5} />
                 </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800, marginBottom: 'var(--space-3)' }}>
+                <h3 className="role-title">
                   I'm a Farmer
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 'var(--space-6)' }}>
+                <p className="role-desc">
                   Get crop recommendations, price forecasts, harvest alerts, and sell directly to buyers with no middlemen.
                 </p>
-                <div className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                <div className="btn btn-primary role-btn">
                   Open Farmer Dashboard <ArrowRight size={16} />
                 </div>
               </div>
             </Link>
 
 
-            <Link to="/buyer" style={{ textDecoration: 'none' }} id="role-buyer-card">
-              <div className="card" style={{
-                padding: 'var(--space-10)', textAlign: 'center', cursor: 'pointer',
-                background: 'linear-gradient(145deg, rgba(37,99,235,0.06) 0%, var(--bg-card) 100%)',
-                border: '1px solid rgba(37,99,235,0.20)'
-              }}>
-                <div style={{ color: '#2563eb', marginBottom: 'var(--space-5)', display: 'flex', justifyContent: 'center' }}>
+            <Link to="/buyer" className="role-link" id="role-buyer-card">
+              <div className="card role-card-buyer">
+                <div className="role-icon-buyer">
                   <ShoppingCart size={64} strokeWidth={1.5} />
                 </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800, marginBottom: 'var(--space-3)' }}>
+                <h3 className="role-title">
                   I'm a Buyer
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 'var(--space-6)' }}>
+                <p className="role-desc">
                   Browse fresh produce with full traceability. Place advance orders, track delivery, and get the best direct-farm prices.
                 </p>
-                <div className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}>
+                <div className="btn btn-outline role-btn">
                   Browse Marketplace <ArrowRight size={16} />
                 </div>
               </div>

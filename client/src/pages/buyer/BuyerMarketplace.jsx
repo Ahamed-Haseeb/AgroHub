@@ -15,12 +15,8 @@ import { fetchCrops, fetchPrediction, fetchTraceability } from '../../api/client
 function PriceTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
-      borderRadius: 'var(--radius-md)', padding: 'var(--space-3)',
-      fontSize: 'var(--text-sm)', boxShadow: 'var(--shadow-lg)'
-    }}>
-      <p style={{ fontWeight: 700, marginBottom: 4, color: 'var(--text-primary)' }}>{label}</p>
+    <div className="chart-tooltip-panel">
+      <p className="chart-tooltip-label">{label}</p>
       {payload.map(p => (
         <p key={p.dataKey} style={{ color: p.color }}>
           {p.name}: <strong>₨ {p.value}</strong>
@@ -41,61 +37,52 @@ function ProductCard({ listing, onSelect }) {
   return (
     <div className="product-card" onClick={() => onSelect(listing)} id={`product-${listing.id}`}>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-3)' }}>
+      <div className="product-card-top-row">
         <span className={`badge ${statusStyle.badge}`}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: statusStyle.dot, display: 'inline-block' }} />
+          <span className="status-dot" style={{ background: statusStyle.dot }} />
           {listing.jit_status}
         </span>
-        {listing.organic && <span className="badge badge-green"><Leaf size={12} style={{ display: 'inline', marginRight: 4 }} /> Organic</span>}
+        {listing.organic && <span className="badge badge-green"><Leaf size={12} className="badge-icon-inline" /> Organic</span>}
       </div>
 
 
       <div className="product-emoji">{listing.icon}</div>
 
 
-      <h3 style={{
-        fontFamily: 'var(--font-display)', fontWeight: 700,
-        fontSize: 'var(--text-lg)', marginBottom: 'var(--space-1)'
-      }}>{listing.crop_name}</h3>
+      <h3 className="product-card-title">{listing.crop_name}</h3>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--text-xs)', marginBottom: 'var(--space-3)' }}>
+      <div className="product-card-origin">
         <MapPin size={11} />
         {listing.origin}
       </div>
 
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-4)' }}>
-        <div style={{ display: 'flex', gap: 2 }}>
+      <div className="product-card-rating-row">
+        <div className="product-card-stars">
           {[1,2,3,4,5].map(s => (
             <Star key={s} size={11} fill={s <= Math.floor(listing.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
           ))}
         </div>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{listing.rating} ({listing.orders} orders)</span>
+        <span className="product-card-rating-text">{listing.rating} ({listing.orders} orders)</span>
       </div>
 
 
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-end', marginBottom: 'var(--space-4)'
-      }}>
+      <div className="product-card-price-row">
         <div>
           <div className="product-price">₨ {listing.price_per_kg}</div>
           <div className="product-unit">per kg</div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>
+        <div className="product-card-avail-col">
+          <div className="product-card-avail-qty">
             {listing.available_kg.toLocaleString()} kg
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>available</div>
+          <div className="product-card-avail-label">available</div>
         </div>
       </div>
 
 
-      <div style={{
-        paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border-subtle)',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 11 }}>
+      <div className="product-card-footer-row">
+        <div className="product-card-delivery-col">
           <Truck size={11} />
           {listing.delivery_days}d delivery
         </div>
@@ -113,106 +100,89 @@ function OrderModal({ listing, onClose }) {
   const total = qty * listing.price_per_kg;
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 'var(--z-modal)',
-      background: 'rgba(0,0,0,0.75)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backdropFilter: 'blur(6px)', padding: 'var(--space-4)'
-    }}>
-      <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border-default)',
-        borderRadius: 'var(--radius-2xl)', padding: 'var(--space-8)',
-        width: '100%', maxWidth: 520,
-        animation: 'scaleIn 0.25s ease both'
-      }}>
+    <div className="order-modal-overlay">
+      <div className="order-modal-content">
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-6)' }}>
+        <div className="order-modal-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 4 }}>
-              <span style={{ fontSize: 32 }}>{listing.icon}</span>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800 }}>
+            <div className="order-modal-title-row">
+              <span className="order-modal-icon">{listing.icon}</span>
+              <h2 className="order-modal-title">
                 {listing.crop_name}
               </h2>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
+            <div className="order-modal-subtitle">
               <MapPin size={12} />
               {listing.origin} · Farmer: {listing.farmer_name}
             </div>
           </div>
-          <button id="order-modal-close" onClick={onClose} className="btn btn-ghost" style={{ padding: 6 }}>
+          <button id="order-modal-close" onClick={onClose} className="btn btn-ghost order-modal-close-btn">
             <X size={20} />
           </button>
         </div>
 
 
-        <div className="buyer-modal-grid" style={{ marginBottom: 'var(--space-6)' }}>
+        <div className="buyer-modal-grid">
           {[
             ['Grade', listing.grade],
             ['Packaging', listing.packaging],
             ['Delivery', `${listing.delivery_days} days`],
           ].map(([k, v]) => (
-            <div key={k} style={{
-              background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-3)', textAlign: 'center'
-            }}>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>{k}</div>
-              <div style={{ fontWeight: 700, fontSize: 'var(--text-sm)' }}>{v}</div>
+            <div key={k} className="order-modal-grid-item">
+              <div className="order-modal-grid-label">{k}</div>
+              <div className="order-modal-grid-val">{v}</div>
             </div>
           ))}
         </div>
 
 
-        <div style={{ marginBottom: 'var(--space-5)' }}>
-          <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
+        <div className="order-qty-section">
+          <label className="order-qty-label">
             Order Quantity (kg)
           </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <div className="order-qty-controls">
             <button id="order-qty-minus" className="btn btn-outline btn-sm" onClick={() => setQty(q => Math.max(10, q - 10))}>−</button>
             <input
               id="order-qty-input"
               type="number"
-              className="input"
+              className="input order-qty-input"
               value={qty}
               onChange={e => setQty(Math.max(10, Math.min(listing.available_kg, +e.target.value)))}
-              style={{ textAlign: 'center', fontWeight: 700 }}
             />
             <button id="order-qty-plus" className="btn btn-outline btn-sm" onClick={() => setQty(q => Math.min(listing.available_kg, q + 10))}>+</button>
           </div>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+          <p className="order-qty-hint">
             Max available: {listing.available_kg.toLocaleString()} kg
           </p>
         </div>
 
 
-        <div style={{
-          background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.20)',
-          borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: 'var(--space-5)'
-        }}>
+        <div className="order-total-panel">
           <div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Total</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'var(--text-2xl)', color: 'var(--agro-green-light)' }}>
+            <div className="order-total-label">Order Total</div>
+            <div className="order-total-val">
               ₨ {total.toLocaleString('en-LK')}
             </div>
           </div>
-          <div style={{ textAlign: 'right', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
+          <div className="order-total-calc">
             <div>{qty} kg × ₨ {listing.price_per_kg}</div>
             <div>Harvest: {new Date(listing.harvest_date).toLocaleDateString('en-LK', { month: 'short', day: 'numeric' })}</div>
           </div>
         </div>
 
 
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-5)'
-        }}>
-          <CheckCircle size={12} color="var(--agro-green-light)" />
-          This advance payment triggers the farmer's JIT Harvest Alert.
+        <div className="order-trust-panel">
+          <CheckCircle size={16} className="order-trust-icon" />
+          <div>
+            <div className="order-trust-title">JIT Harvest Alert</div>
+            <div className="order-trust-desc">
+              This advance payment triggers the farmer's JIT Harvest Alert.
+            </div>
+          </div>
         </div>
 
 
-        <button id="order-place-btn" className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center' }}>
+        <button id="order-place-btn" className="btn btn-primary btn-lg order-place-btn">
           Place Advance Order - ₨ {total.toLocaleString('en-LK')}
         </button>
       </div>
@@ -224,32 +194,29 @@ function OrderModal({ listing, onClose }) {
 function TraceabilityPanel({ steps = [] }) {
   if (!steps.length) return null;
   return (
-    <div className="chart-container" style={{ height: 'fit-content' }}>
-      <div className="chart-title" style={{ marginBottom: 'var(--space-2)' }}><MapPin size={16} style={{ display: 'inline', marginRight: 6 }} /> Order Traceability</div>
+  return (
+    <div className="chart-container chart-container-fit">
+      <div className="chart-title chart-title-spaced"><MapPin size={16} className="badge-icon-inline" /> Order Traceability</div>
       <div className="chart-subtitle">Big Onion · Order #ALERT001</div>
-      <div className="timeline" style={{ marginTop: 'var(--space-5)' }}>
+      <div className="timeline timeline-spaced">
         {steps.map((step, i) => {
           const isActive = !step.done && (i === 0 || steps[i - 1].done);
           return (
             <div key={step.step} className="timeline-item">
               <div className={`timeline-dot ${step.done ? 'done' : isActive ? 'active' : ''}`}>
-                {step.done && <CheckCircle size={8} color="#fff" style={{ position: 'absolute', inset: 0, margin: 'auto' }} />}
+                {step.done && <CheckCircle size={8} color="#fff" className="timeline-icon-check" />}
               </div>
               <div style={{
                 opacity: step.done || isActive ? 1 : 0.45,
                 transition: 'var(--transition-base)'
               }}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  alignItems: 'flex-start', marginBottom: 2
-                }}>
-                  <span style={{
-                    fontWeight: 600, fontSize: 'var(--text-sm)',
-                    color: step.done ? 'var(--agro-green-light)' : isActive ? 'var(--agro-amber-light)' : 'var(--text-secondary)'
-                  }}>{step.step}</span>
-                  {isActive && <span className="badge badge-amber" style={{ fontSize: 9 }}>Next</span>}
+                <div className="timeline-content-flex">
+                  <span className={`timeline-status ${step.done ? 'text-green' : isActive ? 'text-amber' : ''}`}>
+                    {step.step}
+                  </span>
+                  {isActive && <span className="badge badge-amber timeline-badge-next">Next</span>}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                <div className="timeline-time">
                   {step.date} · {step.location}
                 </div>
               </div>
@@ -426,11 +393,11 @@ export default function BuyerMarketplace() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
 
             <div className="chart-container">
-              <div className="chart-title" style={{ fontSize: 'var(--text-base)', marginBottom: 4 }}>
-                <TrendingUp size={14} style={{ display: 'inline', marginRight: 6, color: 'var(--agro-green-light)' }} />
+              <div className="chart-title">
+                <TrendingUp size={14} className="chart-icon" />
                 Big Onion - Price Trend
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }}>
+              <div className="chart-subtitle-small">
                 SARIMA 12-week forecast
               </div>
               <ResponsiveContainer width="100%" height={130}>

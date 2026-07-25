@@ -158,9 +158,8 @@ export default function RegisterPage() {
             <>
               <button
                 type="button"
-                className="auth-link"
+                className="auth-link auth-back-btn"
                 onClick={() => setStep(1)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 'var(--sp-4)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'var(--font)' }}
               >
                 <ChevronLeft size={14} /> Change role
               </button>
@@ -277,10 +276,9 @@ export default function RegisterPage() {
                       <label className="auth-label" htmlFor="reg-district">District</label>
                       <select
                         id="reg-district"
-                        className={`auth-input ${fieldErrors.district ? 'auth-input-error' : ''}`}
+                        className={`auth-input auth-select-none ${fieldErrors.district ? 'auth-input-error' : ''}`}
                         value={form.district}
                         onChange={set('district')}
-                        style={{ appearance: 'none' }}
                       >
                         <option value="">Select district</option>
                         {districts.map(d => (

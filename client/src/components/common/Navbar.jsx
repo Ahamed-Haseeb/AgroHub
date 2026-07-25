@@ -112,9 +112,8 @@ export default function Navbar({ cartCount = 3 }) {
                 <span>AgroHub</span>
               </Link>
               <button
-                className="navbar-hamburger"
+                className="navbar-hamburger navbar-hamburger-menu-open"
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ display: 'flex' }}
                 aria-label="Close menu"
               >
                 <X size={20} />

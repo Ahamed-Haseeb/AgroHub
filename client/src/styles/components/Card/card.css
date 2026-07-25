@@ -139,3 +139,6 @@
   align-items: center;
   gap: 1px;
 }
+
+.badge-icon-inline { display: inline; margin-right: 4px; }
+
