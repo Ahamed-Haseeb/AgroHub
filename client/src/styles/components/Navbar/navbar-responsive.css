@@ -18,15 +18,7 @@
   .navbar-actions {
     gap: 16px;
   }
-  .navbar-categories-inner {
-    padding: 0 var(--sp-4);
-    gap: 16px;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-  }
-  .navbar-cat-link {
-    scroll-snap-align: start;
-  }
+
 }
 
 /* Mobile */
@@ -102,14 +94,6 @@
   }
   .navbar-inner {
     padding: 0 var(--sp-3);
-  }
-  .navbar-categories-inner {
-    gap: 12px;
-    padding: 0 var(--sp-3);
-    height: 40px;
-  }
-  .navbar-cat-link {
-    font-size: 12px;
   }
 }
 

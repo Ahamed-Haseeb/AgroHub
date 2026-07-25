@@ -252,9 +252,7 @@ p {
   .filter-option:hover {
     background: none;
   }
-  .navbar-cat-link:hover {
-    color: var(--text-body);
-  }
+
   .btn:active {
     transform: scale(0.97);
   }
@@ -269,7 +267,6 @@ p {
 /* Print styles (minimal) */
 @media print {
   .navbar,
-  .navbar-categories,
   .footer,
   .dashboard-sidebar,
   .dash-mobile-header,

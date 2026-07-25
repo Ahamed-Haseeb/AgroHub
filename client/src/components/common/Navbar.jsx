@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Search, ShoppingCart, Menu, X, User } from 'lucide-react';
 
-const categories = ["Today's Harvest", 'Best Sellers', 'Organic', 'Root Crops', 'Spices', 'Export Grade', 'Deals'];
 
 export default function Navbar({ cartCount = 3 }) {
   const [category, setCategory] = useState('All');
@@ -94,13 +93,6 @@ export default function Navbar({ cartCount = 3 }) {
         </div>
       )}
 
-      <div className="navbar-categories">
-        <div className="navbar-categories-inner">
-          {categories.map(label => (
-            <Link key={label} to="/" className="navbar-cat-link">{label}</Link>
-          ))}
-        </div>
-      </div>
 
       {mobileMenuOpen && (
         <>
@@ -125,12 +117,6 @@ export default function Navbar({ cartCount = 3 }) {
             <Link to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
               <ShoppingCart size={18} /> Cart {cartCount > 0 && `(${cartCount})`}
             </Link>
-            <hr className="navbar-mobile-divider" />
-            {categories.map(label => (
-              <Link key={label} to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
-                {label}
-              </Link>
-            ))}
           </div>
         </>
       )}
