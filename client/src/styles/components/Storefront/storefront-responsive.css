@@ -188,3 +188,71 @@
     min-height: 36px;
   }
 }
+
+/* Buyer Marketplace responsive */
+@media (max-width: 1024px) {
+  .buyer-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .buyer-sidebar {
+    order: -1;
+  }
+  .buyer-hero-title {
+    font-size: var(--text-3xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .buyer-page {
+    padding-top: 56px;
+  }
+  .buyer-hero {
+    padding: var(--space-6) 0;
+  }
+  .buyer-hero-header {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .buyer-hero-title {
+    font-size: var(--text-2xl);
+  }
+  .buyer-hero-desc {
+    font-size: var(--text-base);
+  }
+  .buyer-cart-btn {
+    align-self: flex-start;
+  }
+  .buyer-controls {
+    flex-direction: column;
+  }
+  .buyer-search-wrap {
+    flex: 1 1 100%;
+  }
+  .buyer-sort-select {
+    width: 100%;
+  }
+  .buyer-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  .buyer-direct-row {
+    font-size: 12px;
+  }
+  .order-modal-content {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+  .buyer-modal-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .buyer-product-grid {
+    grid-template-columns: 1fr;
+  }
+  .buyer-hero-title {
+    font-size: var(--text-xl);
+  }
+}

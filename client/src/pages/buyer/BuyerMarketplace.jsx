@@ -194,7 +194,6 @@ function OrderModal({ listing, onClose }) {
 function TraceabilityPanel({ steps = [] }) {
   if (!steps.length) return null;
   return (
-  return (
     <div className="chart-container chart-container-fit">
       <div className="chart-title chart-title-spaced"><MapPin size={16} className="badge-icon-inline" /> Order Traceability</div>
       <div className="chart-subtitle">Big Onion · Order #ALERT001</div>
@@ -223,6 +222,9 @@ function TraceabilityPanel({ steps = [] }) {
             </div>
           );
         })}
+      </div>
+      <div className="timeline-desc">
+        Updates automatically via farmer's mobile app.
       </div>
     </div>
   );
@@ -254,60 +256,44 @@ export default function BuyerMarketplace() {
     );
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 72 }}>
+    <div className="buyer-page">
 
-      <div style={{
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border-subtle)',
-        padding: 'var(--space-8) 0'
-      }}>
+      <div className="buyer-hero">
         <div className="container">
-          <div style={{
-            display: 'flex', alignItems: 'flex-start',
-            justifyContent: 'space-between', marginBottom: 'var(--space-6)'
-          }}>
+          <div className="buyer-hero-header">
             <div>
-              <div className="hero-eyebrow" style={{ animation: 'none', display: 'inline-flex', marginBottom: 'var(--space-3)' }}>
-                <ShoppingCart size={18} style={{ display: 'inline', marginRight: 6 }} /> D2C Marketplace
+              <div className="hero-eyebrow buyer-hero-eyebrow">
+                <ShoppingCart size={18} className="buyer-hero-icon" /> D2C Marketplace
               </div>
-              <h1 style={{
-                fontFamily: 'var(--font-display)', fontSize: 'var(--text-4xl)',
-                fontWeight: 900, marginBottom: 'var(--space-2)'
-              }}>
+              <h1 className="buyer-hero-title">
                 Fresh From the{' '}
                 <span className="gradient-text">Farm</span>
               </h1>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-lg)' }}>
+              <p className="buyer-hero-desc">
                 Farm-to-doorstep in 24–72 hours. No intermediaries. No markup chains.
               </p>
             </div>
 
-            <button id="buyer-cart-btn" className="btn btn-primary" style={{ position: 'relative' }}>
+            <button id="buyer-cart-btn" className="btn btn-primary buyer-cart-btn">
               <ShoppingCart size={18} />
               Cart
               {cartCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: -8, right: -8,
-                  width: 20, height: 20, background: 'var(--agro-amber)',
-                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 800
-                }}>{cartCount}</span>
+                <span className="buyer-cart-badge">{cartCount}</span>
               )}
             </button>
           </div>
 
 
-          <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+          <div className="buyer-controls">
 
-            <div style={{ position: 'relative', flex: '1 1 300px' }}>
-              <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+            <div className="buyer-search-wrap">
+              <Search size={15} color="var(--text-muted)" className="buyer-search-icon" />
               <input
                 id="marketplace-search"
-                className="input"
+                className="input buyer-search-input"
                 placeholder="Search crops, origin, farmer..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                style={{ paddingLeft: 40 }}
               />
             </div>
 
@@ -325,7 +311,7 @@ export default function BuyerMarketplace() {
           </div>
 
 
-          <div className="chip-row" style={{ marginTop: 'var(--space-4)' }}>
+          <div className="chip-row buyer-chips">
             {categories.map(cat => (
               <button
                 key={cat}
@@ -341,20 +327,17 @@ export default function BuyerMarketplace() {
       </div>
 
 
-      <div className="container" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-16)' }}>
+      <div className="container buyer-content">
         <div className="buyer-layout-grid">
 
 
           <div>
 
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              marginBottom: 'var(--space-5)'
-            }}>
-              <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
-                <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong> listings found
+            <div className="buyer-listings-header">
+              <p className="buyer-listings-count">
+                <strong>{filtered.length}</strong> listings found
               </p>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div className="buyer-filter-badges">
                 {['Harvest Triggered', 'Organic'].map(filter => (
                   filtered.some(l => l.jit_status === filter || (filter === 'Organic' && l.organic)) &&
                   <span key={filter} className={`badge ${filter === 'Harvest Triggered' ? 'badge-green' : 'badge-muted'}`}>
@@ -365,11 +348,7 @@ export default function BuyerMarketplace() {
             </div>
 
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 'var(--space-5)'
-            }}>
+            <div className="buyer-product-grid">
               {filtered.map((listing, i) => (
                 <ProductCard
                   key={listing.id}
@@ -380,8 +359,8 @@ export default function BuyerMarketplace() {
             </div>
 
             {filtered.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 'var(--space-16)', color: 'var(--text-muted)' }}>
-                <div style={{ marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'center' }}>
+              <div className="buyer-empty">
+                <div className="buyer-empty-icon">
                   <Search size={48} strokeWidth={1} color="var(--border-default)" />
                 </div>
                 <p>No listings found for "{search}"</p>
@@ -390,7 +369,7 @@ export default function BuyerMarketplace() {
           </div>
 
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <div className="buyer-sidebar">
 
             <div className="chart-container">
               <div className="chart-title">
@@ -418,12 +397,12 @@ export default function BuyerMarketplace() {
                   <Area type="monotone" dataKey="price" name="₨/kg" stroke="#22c55e" strokeWidth={1.5} fill="url(#buyerPriceGrad)" />
                 </AreaChart>
                 ) : (
-                  <div style={{ height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 12 }}>Loading forecast...</div>
+                  <div className="buyer-chart-loading">Loading forecast...</div>
                 )}
               </ResponsiveContainer>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
-                <span>Current: <strong style={{ color: 'var(--agro-green-light)' }}>₨ {prediction?.forecast?.[0]?.price ?? '-'}</strong></span>
-                <span>12-wk avg: <strong style={{ color: 'var(--text-primary)' }}>₨ {prediction ? Math.round(prediction.forecast.slice(0, 12).reduce((s, w) => s + w.price, 0) / 12) : '-'}</strong></span>
+              <div className="buyer-chart-meta">
+                <span>Current: <strong className="buyer-chart-highlight">₨ {prediction?.forecast?.[0]?.price ?? '-'}</strong></span>
+                <span>12-wk avg: <strong className="buyer-chart-highlight-primary">₨ {prediction ? Math.round(prediction.forecast.slice(0, 12).reduce((s, w) => s + w.price, 0) / 12) : '-'}</strong></span>
               </div>
             </div>
 
@@ -431,9 +410,9 @@ export default function BuyerMarketplace() {
             <TraceabilityPanel steps={traceabilitySteps} />
 
 
-            <div className="card" style={{ background: 'linear-gradient(145deg, rgba(22,163,74,0.08), var(--bg-card))' }}>
-              <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-4)', fontSize: 'var(--text-base)' }}>
-                <ShieldCheck size={18} style={{ display: 'inline', marginRight: 6, color: 'var(--agro-green-light)' }} /> Why Buy Direct?
+            <div className="card buyer-direct-card">
+              <h4 className="buyer-direct-title">
+                <ShieldCheck size={18} className="buyer-direct-icon" /> Why Buy Direct?
               </h4>
               {[
                 ['Fresh harvest guarantee', '24–72hr delivery'],
@@ -441,17 +420,12 @@ export default function BuyerMarketplace() {
                 ['Fair to farmers',         '+42% price gain'],
                 ['Zero hidden fees',        'Direct pricing'],
               ].map(([a, b]) => (
-                <div key={a} style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  padding: 'var(--space-2) 0',
-                  borderBottom: '1px solid var(--border-subtle)',
-                  fontSize: 'var(--text-sm)'
-                }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    <CheckCircle size={11} color="var(--agro-green-light)" style={{ display: 'inline', marginRight: 6 }} />
+                <div key={a} className="buyer-direct-row">
+                  <span className="buyer-direct-label">
+                    <CheckCircle size={11} color="var(--agro-green-light)" className="buyer-direct-check" />
                     {a}
                   </span>
-                  <span style={{ color: 'var(--agro-green-light)', fontWeight: 600 }}>{b}</span>
+                  <span className="buyer-direct-value">{b}</span>
                 </div>
               ))}
             </div>

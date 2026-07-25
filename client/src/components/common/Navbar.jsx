@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Leaf, Search, ShoppingCart, Menu, X, User } from 'lucide-react';
 
 
-export default function Navbar({ cartCount = 3 }) {
+export default function Navbar({ cartCount = 0 }) {
   const [category, setCategory] = useState('All');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

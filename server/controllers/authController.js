@@ -16,48 +16,56 @@ const sanitize = (user) => ({
 // @route  POST /api/auth/register
 // @access Public
 const register = async (req, res) => {
-  const { name, email, password, role, phone, district } = req.body;
+  try {
+    const { name, email, password, role, phone, district } = req.body;
 
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({ message: "All required fields must be filled" });
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All required fields must be filled" });
+    }
+
+    if (!["farmer", "buyer"].includes(role)) {
+      return res.status(400).json({ message: "Role must be farmer or buyer" });
+    }
+
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(409).json({ message: "An account with this email already exists" });
+    }
+
+    const user = await User.create({ name, email, password, role, phone, district });
+
+    res.status(201).json({
+      token: generateToken(user._id),
+      user: sanitize(user),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Registration failed" });
   }
-
-  if (!["farmer", "buyer"].includes(role)) {
-    return res.status(400).json({ message: "Role must be farmer or buyer" });
-  }
-
-  const exists = await User.findOne({ email });
-  if (exists) {
-    return res.status(409).json({ message: "An account with this email already exists" });
-  }
-
-  const user = await User.create({ name, email, password, role, phone, district });
-
-  res.status(201).json({
-    token: generateToken(user._id),
-    user: sanitize(user),
-  });
 };
 
 // @route  POST /api/auth/login
 // @access Public
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || !(await user.matchPassword(password))) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    res.json({
+      token: generateToken(user._id),
+      user: sanitize(user),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Login failed" });
   }
-
-  const user = await User.findOne({ email });
-
-  if (!user || !(await user.matchPassword(password))) {
-    return res.status(401).json({ message: "Invalid email or password" });
-  }
-
-  res.json({
-    token: generateToken(user._id),
-    user: sanitize(user),
-  });
 };
 
 // @route  GET /api/auth/me

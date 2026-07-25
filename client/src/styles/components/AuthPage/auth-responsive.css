@@ -1,3 +1,16 @@
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .auth-brand-panel {
+    padding: var(--sp-8);
+  }
+  .auth-brand-title {
+    font-size: 26px;
+  }
+  .auth-stat-value {
+    font-size: 18px;
+  }
+}
+
 /* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .auth-page {
@@ -7,7 +20,13 @@
     display: none;
   }
   .auth-form-panel {
-    padding: var(--sp-5) var(--sp-4);
+    padding: var(--sp-6) var(--sp-4);
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: var(--sp-10);
+  }
+  .auth-form-container {
+    max-width: 100%;
   }
   .auth-heading {
     font-size: 24px;
@@ -18,15 +37,35 @@
   .auth-role-grid {
     gap: var(--sp-3);
   }
+  .auth-input {
+    padding: 14px;
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+  .auth-submit {
+    padding: 15px 24px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+  .auth-role-card {
+    padding: var(--sp-5) var(--sp-4);
+  }
 }
 
 /* Small mobile (max-width: 480px) */
 @media (max-width: 480px) {
+  .auth-form-panel {
+    padding: var(--sp-5) var(--sp-3);
+    padding-top: var(--sp-8);
+  }
   .auth-heading {
     font-size: 22px;
   }
   .auth-subheading {
     font-size: 13px;
+    margin-bottom: var(--sp-6);
+  }
+  .auth-logo {
+    margin-bottom: var(--sp-8);
   }
   .auth-role-grid {
     grid-template-columns: 1fr;
@@ -42,13 +81,15 @@
   }
 }
 
-/* Landscape Phone Fixes */
+/* Landscape phone */
 @media (max-height: 500px) and (orientation: landscape) {
   .auth-page {
     min-height: auto;
   }
   .auth-form-panel {
     padding: var(--sp-4);
+    min-height: auto;
+    align-items: center;
   }
   .auth-heading {
     font-size: 20px;
@@ -59,7 +100,7 @@
   }
 }
 
-/* Safe Area Insets (Notched phones) */
+/* Notched phones */
 @supports (padding: env(safe-area-inset-bottom)) {
   .auth-form-panel {
     padding-bottom: max(var(--sp-8), env(safe-area-inset-bottom));

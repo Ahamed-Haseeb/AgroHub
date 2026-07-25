@@ -5,6 +5,7 @@ import {
   Tractor, ShoppingBag, CheckCircle, ChevronLeft
 } from 'lucide-react';
 import { registerUser } from '../../api/client';
+import { registerBrandStats } from '../../config/brandStats';
 
 const districts = [
   'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo',
@@ -82,7 +83,7 @@ export default function RegisterPage() {
       if (data.user.role === 'farmer') {
         navigate('/farmer');
       } else {
-        navigate('/');
+        navigate('/buyer');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Try again.');
@@ -344,22 +345,12 @@ export default function RegisterPage() {
           </p>
 
           <div className="auth-stats-grid">
-            <div className="auth-stat-pill">
-              <div className="auth-stat-value">2,847</div>
-              <div className="auth-stat-label">Farmers</div>
-            </div>
-            <div className="auth-stat-pill">
-              <div className="auth-stat-value">38%</div>
-              <div className="auth-stat-label">Waste Cut</div>
-            </div>
-            <div className="auth-stat-pill">
-              <div className="auth-stat-value">+42%</div>
-              <div className="auth-stat-label">Price Gain</div>
-            </div>
-            <div className="auth-stat-pill">
-              <div className="auth-stat-value">6</div>
-              <div className="auth-stat-label">Districts</div>
-            </div>
+            {registerBrandStats.map(stat => (
+              <div key={stat.label} className="auth-stat-pill">
+                <div className="auth-stat-value">{stat.value}</div>
+                <div className="auth-stat-label">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
