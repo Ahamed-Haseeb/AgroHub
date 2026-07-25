@@ -61,6 +61,11 @@
   margin-bottom: 4px;
 }
 
+.badge-icon-inline {
+  display: inline;
+  margin-right: 4px;
+}
+
 .product-card-name {
   font-size: 15px;
   font-weight: 600;
@@ -79,6 +84,12 @@
   gap: var(--sp-1);
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.product-rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
 }
 
 .product-card-price {
@@ -118,7 +129,9 @@
   padding: var(--sp-5);
   transition: var(--ease);
 }
-.stat-card:hover { box-shadow: var(--shadow-sm); }
+.stat-card:hover {
+  box-shadow: var(--shadow-sm);
+}
 
 .stat-value {
   font-size: 28px;
@@ -131,14 +144,4 @@
   color: var(--text-muted);
   font-weight: 500;
 }
-
-/* ---------- Extracted Inline Styles ---------- */
-
-.product-rating-stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.badge-icon-inline { display: inline; margin-right: 4px; }
 

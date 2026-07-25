@@ -32,8 +32,12 @@
   border-bottom: 1px solid var(--bg-surface);
   font-weight: 500;
 }
-.orders-table tbody tr:last-child td { border-bottom: none; }
-.orders-table tbody tr:hover { background: var(--bg-surface); }
+.orders-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.orders-table tbody tr:hover {
+  background: var(--bg-surface);
+}
 
 .status-badge {
   display: inline-flex;
@@ -44,8 +48,23 @@
   font-size: 12px;
   font-weight: 600;
 }
-.status-processing { background: var(--amber-light); color: #92400e; }
-.status-shipped    { background: var(--blue-soft); color: var(--blue); }
-.status-completed  { background: var(--primary-light); color: var(--primary); }
-.status-confirmed  { background: var(--primary-light); color: var(--primary); }
-.status-awaiting   { background: var(--amber-light); color: #92400e; }
+.status-processing {
+  background: var(--amber-light);
+  color: #92400e;
+}
+.status-shipped {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.status-completed {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.status-confirmed {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.status-awaiting {
+  background: var(--amber-light);
+  color: #92400e;
+}

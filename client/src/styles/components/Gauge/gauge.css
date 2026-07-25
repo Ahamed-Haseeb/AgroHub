@@ -10,6 +10,12 @@
   border-radius: var(--radius-full);
   transition: width 1s ease;
 }
-.gauge-green  { background: var(--primary); }
-.gauge-amber  { background: var(--amber); }
-.gauge-red    { background: var(--red); }
+.gauge-green {
+  background: var(--primary);
+}
+.gauge-amber {
+  background: var(--amber);
+}
+.gauge-red {
+  background: var(--red);
+}

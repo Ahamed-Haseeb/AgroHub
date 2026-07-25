@@ -174,8 +174,12 @@
   font-size: 14px;
   font-weight: 600;
 }
-.crop-price-change.positive { color: #2f4538; }
-.crop-price-change.negative { color: #b45309; }
+.crop-price-change.positive {
+  color: #2f4538;
+}
+.crop-price-change.negative {
+  color: #b45309;
+}
 .crop-price-updated {
   font-size: 12px;
   color: var(--text-muted);
@@ -381,8 +385,7 @@
   font-weight: 800;
 }
 
-/* ---------- Extracted Inline Styles ---------- */
-
+/* ---------- Dashboard Tooltips & Mobile ---------- */
 .dash-tooltip {
   background: var(--bg-white);
   border: 1px solid var(--border);
@@ -632,4 +635,3 @@
   font-weight: 700;
   margin-bottom: 20px;
 }
-

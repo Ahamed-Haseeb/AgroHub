@@ -25,7 +25,9 @@
   background: var(--primary-hover);
   box-shadow: var(--shadow-sm);
 }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:active {
+  transform: scale(0.98);
+}
 
 .btn-outline {
   background: var(--bg-white);
@@ -50,8 +52,20 @@
   background: var(--amber);
   color: var(--text-inverse);
 }
-.btn-amber:hover { background: #a56718; }
+.btn-amber:hover {
+  background: #a56718;
+}
 
-.btn-sm { padding: 6px 12px; font-size: 13px; }
-.btn-lg { padding: 12px 32px; font-size: 15px; border-radius: var(--radius-md); }
-.btn-block { width: 100%; justify-content: center; }
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.btn-lg {
+  padding: 12px 32px;
+  font-size: 15px;
+  border-radius: var(--radius-md);
+}
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}

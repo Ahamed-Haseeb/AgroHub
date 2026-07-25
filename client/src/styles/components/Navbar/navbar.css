@@ -105,7 +105,6 @@
   color: var(--text-heading);
 }
 
-
 .navbar-cart {
   position: relative;
   display: flex;
@@ -150,7 +149,9 @@
   height: 36px;
   overflow-x: auto;
 }
-.navbar-categories-inner::-webkit-scrollbar { display: none; }
+.navbar-categories-inner::-webkit-scrollbar {
+  display: none;
+}
 .navbar-cat-link {
   font-size: 13px;
   font-weight: 500;
@@ -185,7 +186,9 @@
   transform: scale(0.92);
 }
 
-.navbar-account-icon { display: none; }
+.navbar-account-icon {
+  display: none;
+}
 
 .navbar-mobile-search {
   background: var(--bg-white);
@@ -262,6 +265,6 @@
   margin: var(--sp-3) var(--sp-6);
 }
 
-
-.navbar-hamburger-menu-open { display: flex; }
-
+.navbar-hamburger-menu-open {
+  display: flex;
+}

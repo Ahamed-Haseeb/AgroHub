@@ -8,8 +8,23 @@
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.badge-green  { background: var(--primary-light); color: var(--primary); }
-.badge-amber  { background: var(--amber-light); color: var(--amber); }
-.badge-red    { background: var(--red-soft); color: var(--red); }
-.badge-blue   { background: var(--blue-soft); color: var(--blue); }
-.badge-muted  { background: var(--bg-surface); color: var(--text-muted); }
+.badge-green {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.badge-amber {
+  background: var(--amber-light);
+  color: var(--amber);
+}
+.badge-red {
+  background: var(--red-soft);
+  color: var(--red);
+}
+.badge-blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.badge-muted {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+}
