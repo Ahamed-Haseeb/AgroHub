@@ -1,10 +1,21 @@
 import { Star, Truck, Leaf } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { toast } from 'react-hot-toast';
 
-export default function ProductCard({ listing, onAddToCart }) {
+export default function ProductCard({ listing }) {
+  const { addItem } = useCart();
   const filledStars = Math.round(listing.rating);
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(listing);
+    toast.success('Added to cart');
+  };
+
   return (
-    <div className="product-card">
+    <Link to={`/product/${listing.listing_id}`} className="product-card" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
       <div className="product-card-image">
         <img src={listing.image_url} alt={listing.crop_name} />
       </div>
@@ -40,10 +51,10 @@ export default function ProductCard({ listing, onAddToCart }) {
       </div>
 
       <div className="product-card-footer">
-        <button className="btn btn-primary btn-block" onClick={() => onAddToCart?.(listing)}>
+        <button className="btn btn-primary btn-block" onClick={handleAddToCart}>
           Add to Cart
         </button>
       </div>
-    </div>
+    </Link>
   );
 }

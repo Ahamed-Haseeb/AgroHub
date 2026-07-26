@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import {
   fetchPrediction, fetchAdvisory, fetchAlerts,
-  fetchAvailableCrops, fetchOrders, fetchMarketPrices,
-  fetchCrops
+  fetchAvailableCrops, fetchFarmerOrders, fetchMarketPrices,
+  fetchCrops, updateOrderStatus
 } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
@@ -133,9 +133,9 @@ export default function FarmerDashboard() {
     queryFn: fetchAvailableCrops,
   });
 
-  const { data: activeOrders = [] } = useQuery({
-    queryKey: ['orders'],
-    queryFn: fetchOrders,
+  const { data: activeOrders = [], refetch: refetchOrders } = useQuery({
+    queryKey: ['farmerOrders'],
+    queryFn: fetchFarmerOrders,
   });
 
   const { data: allCrops = [] } = useQuery({
@@ -254,16 +254,31 @@ export default function FarmerDashboard() {
                   <div className="orders-title">Active Orders</div>
                   <table className="orders-table">
                     <thead>
-                      <tr><th>Order ID</th><th>Crop</th><th>Quantity</th><th>Status</th><th>Price</th></tr>
+                      <tr><th>Order #</th><th>Items</th><th>Buyer</th><th>Total</th><th>Status</th><th>Action</th></tr>
                     </thead>
                     <tbody>
                       {activeOrders.map(order => (
-                        <tr key={order.order_number}>
+                        <tr key={order._id}>
                           <td className="fw-600">{order.order_number}</td>
-                          <td>{order.crop}</td>
-                          <td>{order.quantity}</td>
-                          <td><span className={`status-badge ${order.status_class}`}>{order.status}</span></td>
-                          <td className="fw-600">{order.price}</td>
+                          <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
+                          <td>{order.buyer?.name || '—'}</td>
+                          <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
+                          <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
+                          <td>
+                            {order.status === 'Pending' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Confirmed'); refetchOrders(); }}>Confirm</button>
+                            )}
+                            {order.status === 'Confirmed' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Processing'); refetchOrders(); }}>Process</button>
+                            )}
+                            {order.status === 'Processing' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Shipped'); refetchOrders(); }}>Ship</button>
+                            )}
+                            {order.status === 'Shipped' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Delivered'); refetchOrders(); }}>Delivered</button>
+                            )}
+                            {(order.status === 'Delivered' || order.status === 'Cancelled') && <span style={{color:'var(--text-muted)', fontSize: 13}}>Done</span>}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -457,15 +472,30 @@ export default function FarmerDashboard() {
               <div className="orders-card orders-card-spaced">
                 <div className="orders-title">All Orders</div>
                 <table className="orders-table">
-                  <thead><tr><th>Order ID</th><th>Crop</th><th>Quantity</th><th>Status</th><th>Price</th></tr></thead>
+                  <thead><tr><th>Order #</th><th>Items</th><th>Buyer</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
                   <tbody>
                     {activeOrders.map(order => (
-                      <tr key={order.order_number}>
+                      <tr key={order._id}>
                         <td className="fw-600">{order.order_number}</td>
-                        <td>{order.crop}</td>
-                        <td>{order.quantity}</td>
-                        <td><span className={`status-badge ${order.status_class}`}>{order.status}</span></td>
-                        <td className="fw-600">{order.price}</td>
+                        <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
+                        <td>{order.buyer?.name || '—'}</td>
+                        <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
+                        <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
+                        <td>
+                          {order.status === 'Pending' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Confirmed'); refetchOrders(); }}>Confirm</button>
+                          )}
+                          {order.status === 'Confirmed' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Processing'); refetchOrders(); }}>Process</button>
+                          )}
+                          {order.status === 'Processing' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Shipped'); refetchOrders(); }}>Ship</button>
+                          )}
+                          {order.status === 'Shipped' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Delivered'); refetchOrders(); }}>Delivered</button>
+                          )}
+                          {(order.status === 'Delivered' || order.status === 'Cancelled') && <span style={{color:'var(--text-muted)', fontSize: 13}}>Done</span>}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

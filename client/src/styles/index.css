@@ -34,3 +34,6 @@
 
 @import "./components/LandingPage/landing.css";
 @import "./components/LandingPage/landing-responsive.css";
+
+@import "./components/Product/product.css";
+@import "./components/Cart/cart.css";

@@ -9,7 +9,7 @@ import {
   TrendingUp, Leaf, ChevronDown, X, ShieldCheck
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCrops, fetchPrediction, fetchTraceability } from '../../api/client';
+import { fetchCrops, fetchPrediction, fetchTraceability, fetchMyOrders } from '../../api/client';
 
 
 function PriceTooltip({ active, payload, label }) {
@@ -243,6 +243,7 @@ export default function BuyerMarketplace() {
   const { data: cropListings = [] } = useQuery({ queryKey: ['crops'], queryFn: fetchCrops });
   const { data: prediction } = useQuery({ queryKey: ['prediction', 'ONION_BIG_LK'], queryFn: () => fetchPrediction('ONION_BIG_LK') });
   const { data: traceabilitySteps = [] } = useQuery({ queryKey: ['traceability', 'ALERT001'], queryFn: () => fetchTraceability('ALERT001') });
+  const { data: myOrders = [] } = useQuery({ queryKey: ['myOrders'], queryFn: fetchMyOrders });
 
   const filtered = cropListings
     .filter(l =>
@@ -436,6 +437,33 @@ export default function BuyerMarketplace() {
 
       {selectedItem && (
         <OrderModal listing={selectedItem} onClose={() => setSelectedItem(null)} />
+      )}
+
+      {myOrders.length > 0 && (
+        <div className="buyer-section">
+          <div className="buyer-section-header">
+            <h2 className="buyer-section-title"><Package size={20} /> My Orders</h2>
+          </div>
+          <div className="orders-card">
+            <table className="orders-table">
+              <thead>
+                <tr><th>Order #</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                {myOrders.map(order => (
+                  <tr key={order._id}>
+                    <td className="fw-600">{order.order_number}</td>
+                    <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
+                    <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
+                    <td style={{ textTransform: 'capitalize' }}>{order.payment?.method?.replace('_', ' ')}</td>
+                    <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
+                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </div>
   );

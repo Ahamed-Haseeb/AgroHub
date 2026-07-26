@@ -78,4 +78,10 @@ export const logoutUser = async () => {
   return data;
 };
 
+export const createOrder = (orderData) => api.post('/orders', orderData).then(r => r.data);
+export const fetchMyOrders = () => api.get('/orders/mine').then(r => r.data);
+export const fetchFarmerOrders = () => api.get('/orders/farmer').then(r => r.data);
+export const fetchOrderById = (id) => api.get(`/orders/${id}`).then(r => r.data);
+export const updateOrderStatus = (id, status) => api.patch(`/orders/${id}/status`, { status }).then(r => r.data);
+
 export default api;

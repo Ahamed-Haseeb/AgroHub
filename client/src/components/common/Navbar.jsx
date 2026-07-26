@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Search, ShoppingCart, Menu, X, User, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
-export default function Navbar({ cartCount = 0 }) {
+export default function Navbar() {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
   const [category, setCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +110,7 @@ export default function Navbar({ cartCount = 0 }) {
                 </Link>
               )}
 
-              <Link to="/" className="navbar-cart">
+              <Link to="/cart" className="navbar-cart">
                 <ShoppingCart size={20} />
                 <span className="navbar-cart-label">Cart</span>
                 {cartCount > 0 && (
