@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
 import cropRoutes from "./routes/cropRoutes.js";
@@ -16,6 +17,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
+app.use(cookieParser());
 
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:3000"],

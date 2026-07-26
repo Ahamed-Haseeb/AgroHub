@@ -1,4 +1,5 @@
 import { useState  } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -12,8 +13,10 @@ import {
 } from 'lucide-react';
 import {
   fetchPrediction, fetchAdvisory, fetchAlerts,
-  fetchAvailableCrops, fetchOrders, fetchMarketPrices
+  fetchAvailableCrops, fetchOrders, fetchMarketPrices,
+  fetchCrops
 } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
 const getCropColor = (name) => {
   const palettes = [
@@ -97,6 +100,7 @@ const packagingItems = [
 
 
 export default function FarmerDashboard() {
+  const { user: currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedCrop, setSelectedCrop] = useState('ONION_BIG_LK');
   const [checkedItems, setCheckedItems] = useState({});
@@ -134,6 +138,12 @@ export default function FarmerDashboard() {
     queryFn: fetchOrders,
   });
 
+  const { data: allCrops = [] } = useQuery({
+    queryKey: ['crops'],
+    queryFn: () => fetchCrops(),
+  });
+  const myListings = allCrops.filter(c => c.farmer_name === currentUser?.name);
+
   const allChecked = packagingItems.filter(i => i.required).every(i => checkedItems[i.id]);
   const toggleCheck = id => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
@@ -147,7 +157,9 @@ export default function FarmerDashboard() {
     <>
 
       <div className="dash-mobile-header">
-        <span><Leaf size={18} /> AgroHub</span>
+        <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Leaf size={18} /> AgroHub
+        </Link>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="dash-mobile-menu-btn">
           <Menu size={20} />
         </button>
@@ -155,10 +167,10 @@ export default function FarmerDashboard() {
 
       <div className="dashboard-layout">
         <aside className={`dashboard-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
-          <div className="sidebar-logo">
+          <Link to="/" className="sidebar-logo" style={{ textDecoration: 'none' }}>
             <Leaf size={20} color="var(--bg-white)" />
             AgroHub
-          </div>
+          </Link>
 
           <div className="sidebar-nav">
             {sidebarItems.map(item => (
@@ -174,14 +186,17 @@ export default function FarmerDashboard() {
           </div>
 
           <div className="sidebar-user">
-            <div className="sidebar-avatar">SP</div>
+            <div className="sidebar-avatar">{currentUser ? getInitials(currentUser.name) : 'SP'}</div>
             <div>
-              <div className="sidebar-user-name">Suresh Perera</div>
-              <div className="sidebar-user-role">Farmer</div>
+              <div className="sidebar-user-name">{currentUser ? currentUser.name : 'Loading...'}</div>
+              <div className="sidebar-user-role">{currentUser ? currentUser.role : 'Farmer'}</div>
             </div>
           </div>
 
-          <button className="sidebar-logout">
+          <button className="sidebar-logout" onClick={() => {
+            logout();
+            window.location.href = '/login';
+          }}>
             <LogOut size={16} />
             Log out
           </button>
@@ -267,7 +282,9 @@ export default function FarmerDashboard() {
               <div className="dash-info-banner advisor-banner">
                 <TrendingUp size={22} color="var(--primary)" />
                 <div>
-                  <div className="advisor-banner-title">Market Analysis — July 2026</div>
+                  <div className="advisor-banner-title">
+                    Market Analysis — {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </div>
                   <p className="advisor-banner-text">
                     Based on CMC wholesale data and SARIMA models for Q3 2026, these crops show the highest ROI for Dambulla.
                   </p>
@@ -544,20 +561,24 @@ export default function FarmerDashboard() {
                 <table className="orders-table">
                   <thead><tr><th>Crop</th><th>Quantity</th><th>Price</th><th>Status</th><th>Harvest Date</th><th></th></tr></thead>
                   <tbody>
-                    {[
-                      { name: 'Big Onion', qty: '2,500 kg', price: '₨ 210/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 10, 2026' },
-                      { name: 'Capsicum', qty: '600 kg', price: '₨ 320/kg', status: 'Harvest Triggered', statusClass: 'status-confirmed', harvest: 'Jul 8, 2026' },
-                      { name: 'Carrot', qty: '1,200 kg', price: '₨ 145/kg', status: 'Awaiting Order', statusClass: 'status-awaiting', harvest: 'Jul 12, 2026' },
-                    ].map(l => (
-                      <tr key={l.name}>
-                        <td className="fw-600">{l.name}</td>
-                        <td>{l.qty}</td>
-                        <td className="fw-600 text-primary">{l.price}</td>
-                        <td><span className={`status-badge ${l.statusClass}`}>{l.status}</span></td>
-                        <td>{l.harvest}</td>
-                        <td><button className="btn btn-ghost btn-sm">Edit</button></td>
-                      </tr>
-                    ))}
+                    {myListings.length === 0 ? (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: 'var(--space-8)' }}>No active listings found.</td></tr>
+                    ) : (
+                      myListings.map(l => (
+                        <tr key={l.listing_id}>
+                          <td className="fw-600">{l.crop_name}</td>
+                          <td>{l.available_kg?.toLocaleString()} kg</td>
+                          <td className="fw-600 text-primary">₨ {l.price_per_kg}/kg</td>
+                          <td>
+                            <span className={`status-badge ${l.jit_status === 'Harvest Triggered' ? 'status-confirmed' : 'status-awaiting'}`}>
+                              {l.jit_status}
+                            </span>
+                          </td>
+                          <td>{l.harvest_date}</td>
+                          <td><button className="btn btn-ghost btn-sm">Edit</button></td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -573,10 +594,10 @@ export default function FarmerDashboard() {
               <div className="dash-info-card dash-settings-card">
                 <h3 className="dash-settings-title">Profile</h3>
                 {[
-                  ['Full Name', 'Suresh Perera'],
-                  ['Email', 'suresh.perera@agrohub.lk'],
-                  ['Region', 'Dambulla, Matale District'],
-                  ['Farm Size', '2.4 hectares'],
+                  ['Full Name', currentUser ? currentUser.name : 'Loading...'],
+                  ['Email', currentUser ? currentUser.email : 'Loading...'],
+                  ['Region', currentUser ? currentUser.district : 'Loading...'],
+                  ['Role', currentUser ? currentUser.role : 'Farmer'],
                   ['JIT Status', 'Active — Verified'],
                 ].map(([k, v]) => (
                   <div key={k} className="dash-settings-row">

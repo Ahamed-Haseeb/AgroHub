@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "/api",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -67,10 +68,13 @@ export const registerUser = async (userData) => {
   return data;
 };
 
-export const fetchCurrentUser = async (token) => {
-  const { data } = await api.get("/auth/me", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const fetchCurrentUser = async () => {
+  const { data } = await api.get("/auth/me");
+  return data;
+};
+
+export const logoutUser = async () => {
+  const { data } = await api.post("/auth/logout");
   return data;
 };
 

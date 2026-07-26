@@ -1,12 +1,26 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Leaf, Search, ShoppingCart, Menu, X, User } from 'lucide-react';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { Leaf, Search, ShoppingCart, Menu, X, User, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar({ cartCount = 0 }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [category, setCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.append('q', searchQuery.trim());
+    if (category !== 'All') params.append('category', category);
+    
+    navigate(`/?${params.toString()}`);
+    setMobileSearchOpen(false);
+  };
 
   return (
     <header>
@@ -18,7 +32,7 @@ export default function Navbar({ cartCount = 0 }) {
               <span>AgroHub</span>
             </Link>
 
-            <div className="navbar-search">
+            <form className="navbar-search" onSubmit={handleSearch}>
               <select
                 className="navbar-search-select"
                 value={category}
@@ -34,11 +48,13 @@ export default function Navbar({ cartCount = 0 }) {
                 className="navbar-search-input"
                 type="text"
                 placeholder="Search AgroHub"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
               />
-              <button className="navbar-search-btn">
+              <button type="submit" className="navbar-search-btn">
                 <Search size={16} />
               </button>
-            </div>
+            </form>
 
             <div className="navbar-actions">
               <button
@@ -49,13 +65,48 @@ export default function Navbar({ cartCount = 0 }) {
                 <Search size={20} />
               </button>
 
-              <Link to="/login" className="navbar-account">
-                <span className="navbar-account-greeting">Hello, Sign in</span>
-                <span className="navbar-account-label">
-                  <User size={18} className="navbar-account-icon" />
-                  <span className="navbar-account-text">Account</span>
-                </span>
-              </Link>
+              {user ? (
+                <div 
+                  className="navbar-account dropdown-container"
+                  onMouseEnter={() => setDropdownOpen(true)}
+                  onMouseLeave={() => setDropdownOpen(false)}
+                >
+                  <span className="navbar-account-greeting">Hello, {user.name.split(' ')[0]}</span>
+                  <span className="navbar-account-label">
+                    <User size={18} className="navbar-account-icon" />
+                    <span className="navbar-account-text">Profile</span>
+                  </span>
+
+                  {dropdownOpen && (
+                    <div className="navbar-dropdown">
+                      <div className="navbar-dropdown-header">
+                        <div className="navbar-dropdown-name">{user.name}</div>
+                        <div className="navbar-dropdown-email">{user.email}</div>
+                      </div>
+                      <Link to={user.role === 'farmer' ? '/farmer' : '/buyer'} className="navbar-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                        <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+                      <button 
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          logout();
+                        }} 
+                        className="navbar-dropdown-item logout-btn"
+                      >
+                        <LogOut size={16} /> Log Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="navbar-account">
+                  <span className="navbar-account-greeting">Hello, Sign in</span>
+                  <span className="navbar-account-label">
+                    <User size={18} className="navbar-account-icon" />
+                    <span className="navbar-account-text">Account</span>
+                  </span>
+                </Link>
+              )}
 
               <Link to="/" className="navbar-cart">
                 <ShoppingCart size={20} />
@@ -79,17 +130,19 @@ export default function Navbar({ cartCount = 0 }) {
 
       {mobileSearchOpen && (
         <div className="navbar-mobile-search">
-          <div className="navbar-mobile-search-inner">
+          <form className="navbar-mobile-search-inner" onSubmit={handleSearch}>
             <input
               type="text"
               className="auth-input"
               placeholder="Search fresh produce..."
               autoFocus
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
             />
-            <button className="btn btn-primary btn-sm" onClick={() => setMobileSearchOpen(false)}>
+            <button type="submit" className="btn btn-primary btn-sm">
               <Search size={14} />
             </button>
-          </div>
+          </form>
         </div>
       )}
 
@@ -111,9 +164,15 @@ export default function Navbar({ cartCount = 0 }) {
                 <X size={20} />
               </button>
             </div>
-            <Link to="/login" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
-              <User size={18} /> Sign In / Register
-            </Link>
+            {user ? (
+              <Link to={user.role === 'farmer' ? '/farmer' : '/buyer'} className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                <LayoutDashboard size={18} /> Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                <User size={18} /> Sign In / Register
+              </Link>
+            )}
             <Link to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
               <ShoppingCart size={18} /> Cart {cartCount > 0 && `(${cartCount})`}
             </Link>

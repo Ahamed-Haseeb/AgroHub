@@ -4,6 +4,20 @@ import User from "../models/User.js";
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
+const setTokenCookie = (res, token, remember = false) => {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  };
+
+  if (remember) {
+    cookieOptions.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+  }
+
+  res.cookie("jwt", token, cookieOptions);
+};
+
 const sanitize = (user) => ({
   _id: user._id,
   name: user.name,
@@ -34,8 +48,10 @@ const register = async (req, res) => {
 
     const user = await User.create({ name, email, password, role, phone, district });
 
+    const token = generateToken(user._id);
+    setTokenCookie(res, token, true); // Always remember on register, or pass remember flag if added to form
+
     res.status(201).json({
-      token: generateToken(user._id),
       user: sanitize(user),
     });
   } catch (err) {
@@ -47,7 +63,7 @@ const register = async (req, res) => {
 // @access Public
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
@@ -59,8 +75,10 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    const token = generateToken(user._id);
+    setTokenCookie(res, token, remember);
+
     res.json({
-      token: generateToken(user._id),
       user: sanitize(user),
     });
   } catch (err) {
@@ -74,4 +92,14 @@ const getMe = async (req, res) => {
   res.json({ user: sanitize(req.user) });
 };
 
-export { register, login, getMe };
+// @route  POST /api/auth/logout
+// @access Private
+const logout = async (req, res) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
+export { register, login, getMe, logout };

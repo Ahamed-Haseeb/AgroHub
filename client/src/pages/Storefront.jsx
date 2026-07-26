@@ -1,4 +1,5 @@
 import { useState, useMemo  } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Truck, Shield, Recycle, TrendingUp } from 'lucide-react';
 import HeroBanner from '../components/storefront/HeroBanner';
@@ -15,8 +16,12 @@ const trustItems = [
 ];
 
 export default function Storefront() {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q')?.toLowerCase() || '';
+  const searchCategory = searchParams.get('category') || 'All';
+
   const [sortBy, setSortBy] = useState('featured');
-    const [filters, setFilters] = useState({ origins: [], grades: [], certifications: [] });
+  const [filters, setFilters] = useState({ origins: [], grades: [], certifications: [] });
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
   const { data: cropListings = [], isLoading, isError } = useQuery({
@@ -26,6 +31,17 @@ export default function Storefront() {
 
   const filtered = useMemo(() => {
     let list = [...cropListings];
+
+    if (searchQuery) {
+      list = list.filter(l => 
+        l.crop_name.toLowerCase().includes(searchQuery) || 
+        l.origin.toLowerCase().includes(searchQuery)
+      );
+    }
+
+    if (searchCategory !== 'All') {
+      list = list.filter(l => l.category === searchCategory);
+    }
 
     if (filters.origins.length > 0) {
       list = list.filter(l => filters.origins.some(o => l.origin.toLowerCase().includes(o.toLowerCase())));
@@ -84,6 +100,13 @@ export default function Storefront() {
             priceRange={priceRange}
           />
           <div className="storefront-main">
+            {(searchQuery || searchCategory !== 'All') && (
+              <div style={{ marginBottom: '16px', padding: '12px 16px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '15px', color: 'var(--text-heading)', margin: 0 }}>
+                  Showing results for {searchQuery ? `"${searchQuery}"` : 'all crops'} {searchCategory !== 'All' ? `in ${searchCategory}` : ''}
+                </h3>
+              </div>
+            )}
             <ProductGrid
               listings={filtered}
               totalCount={cropListings.length}

@@ -4,8 +4,11 @@ import { Leaf, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { loginUser } from '../../api/client';
 import { brandStats } from '../../config/brandStats';
 
+import { useAuth } from '../../context/AuthContext';
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -25,12 +28,8 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const data = await loginUser(form);
-      const storage = remember ? localStorage : sessionStorage;
-      storage.setItem('agrohub_token', data.token);
-      storage.setItem('agrohub_user', JSON.stringify(data.user));
-
-      if (data.user.role === 'farmer') {
+      const user = await login({ ...form, remember });
+      if (user.role === 'farmer') {
         navigate('/farmer');
       } else {
         navigate('/buyer');
