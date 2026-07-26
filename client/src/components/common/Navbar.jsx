@@ -1,93 +1,186 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Leaf, Menu, X, Bell, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Leaf, Search, ShoppingCart, Menu, X, User, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
-  const [scrolled, setScrolled]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/farmer') || location.pathname.startsWith('/buyer');
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
+  const navigate = useNavigate();
+  const [category, setCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.append('q', searchQuery.trim());
+    if (category !== 'All') params.append('category', category);
+    
+    navigate(`/?${params.toString()}`);
+    setMobileSearchOpen(false);
+  };
 
   return (
-    <nav className={`navbar ${scrolled || isDashboard ? 'scrolled' : ''}`}>
-      <div className="container">
-        <div className="nav-inner">
-          {/* Logo */}
-          <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
-            <Leaf size={22} color="#22c55e" />
-            AgroHub
-          </Link>
+    <header>
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <div className="navbar-row">
+            <Link to="/" className="navbar-logo">
+              <Leaf size={20} color="var(--primary)" />
+              <span>AgroHub</span>
+            </Link>
 
-          {/* Desktop Links */}
-          {!isDashboard && (
-            <ul className="nav-links">
-              <li><a href="#features">Platform</a></li>
-              <li><a href="#how-it-works">How It Works</a></li>
-              <li><a href="#stats">Impact</a></li>
-            </ul>
-          )}
+            <form className="navbar-search" onSubmit={handleSearch}>
+              <select
+                className="navbar-search-select"
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+              >
+                <option>All</option>
+                <option>Vegetables</option>
+                <option>Root Crops</option>
+                <option>Greens</option>
+                <option>Spices</option>
+              </select>
+              <input
+                className="navbar-search-input"
+                type="text"
+                placeholder="Search AgroHub"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" className="navbar-search-btn">
+                <Search size={16} />
+              </button>
+            </form>
 
-          {/* Actions */}
-          <div className="nav-actions">
-            {isDashboard ? (
-              <>
-                <button
-                  id="nav-alerts-btn"
-                  className="btn btn-ghost btn-sm"
-                  style={{ position: 'relative', padding: '8px' }}
+            <div className="navbar-actions">
+              <button
+                className="navbar-mobile-search-btn"
+                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+
+              {user ? (
+                <div 
+                  className="navbar-account dropdown-container"
+                  onMouseEnter={() => setDropdownOpen(true)}
+                  onMouseLeave={() => setDropdownOpen(false)}
                 >
-                  <Bell size={18} />
-                  <span style={{
-                    position: 'absolute', top: 4, right: 4,
-                    width: 8, height: 8, borderRadius: '50%',
-                    background: 'var(--agro-amber)', display: 'block'
-                  }} />
-                </button>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: 'var(--radius-full)',
-                  padding: '6px 12px 6px 8px',
-                  cursor: 'pointer'
-                }}>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    background: 'var(--grad-primary)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 13, fontWeight: 700, color: '#fff'
-                  }}>SP</div>
-                  <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                    Suresh P.
+                  <span className="navbar-account-greeting">Hello, {user.name.split(' ')[0]}</span>
+                  <span className="navbar-account-label">
+                    <User size={18} className="navbar-account-icon" />
+                    <span className="navbar-account-text">Profile</span>
                   </span>
-                  <ChevronDown size={14} color="var(--text-muted)" />
-                </div>
-              </>
-            ) : (
-              <>
-                <Link to="/buyer" className="btn btn-ghost btn-sm">Buyer Portal</Link>
-                <Link to="/farmer" className="btn btn-primary btn-sm">Farmer Dashboard</Link>
-              </>
-            )}
-          </div>
 
-          {/* Mobile Toggle */}
-          <button
-            id="nav-mobile-toggle"
-            className="btn btn-ghost"
-            style={{ display: 'none' }}
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+                  {dropdownOpen && (
+                    <div className="navbar-dropdown">
+                      <div className="navbar-dropdown-header">
+                        <div className="navbar-dropdown-name">{user.name}</div>
+                        <div className="navbar-dropdown-email">{user.email}</div>
+                      </div>
+                      <Link to={user.role === 'farmer' ? '/farmer' : '/buyer'} className="navbar-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                        <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+                      <button 
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          logout();
+                        }} 
+                        className="navbar-dropdown-item logout-btn"
+                      >
+                        <LogOut size={16} /> Log Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="navbar-account">
+                  <span className="navbar-account-greeting">Hello, Sign in</span>
+                  <span className="navbar-account-label">
+                    <User size={18} className="navbar-account-icon" />
+                    <span className="navbar-account-text">Account</span>
+                  </span>
+                </Link>
+              )}
+
+              <Link to="/cart" className="navbar-cart">
+                <ShoppingCart size={20} />
+                <span className="navbar-cart-label">Cart</span>
+                {cartCount > 0 && (
+                  <span className="navbar-cart-badge">{cartCount}</span>
+                )}
+              </Link>
+
+              <button
+                className="navbar-hamburger"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {mobileSearchOpen && (
+        <div className="navbar-mobile-search">
+          <form className="navbar-mobile-search-inner" onSubmit={handleSearch}>
+            <input
+              type="text"
+              className="auth-input"
+              placeholder="Search fresh produce..."
+              autoFocus
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            <button type="submit" className="btn btn-primary btn-sm">
+              <Search size={14} />
+            </button>
+          </form>
+        </div>
+      )}
+
+
+      {mobileMenuOpen && (
+        <>
+          <div className="navbar-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
+          <div className="navbar-mobile-menu">
+            <div className="navbar-mobile-menu-header">
+              <Link to="/" className="navbar-logo" onClick={() => setMobileMenuOpen(false)}>
+                <Leaf size={18} color="var(--primary)" />
+                <span>AgroHub</span>
+              </Link>
+              <button
+                className="navbar-hamburger navbar-hamburger-menu-open"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            {user ? (
+              <Link to={user.role === 'farmer' ? '/farmer' : '/buyer'} className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                <LayoutDashboard size={18} /> Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                <User size={18} /> Sign In / Register
+              </Link>
+            )}
+            <Link to="/" className="navbar-mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+              <ShoppingCart size={18} /> Cart {cartCount > 0 && `(${cartCount})`}
+            </Link>
+          </div>
+        </>
+      )}
+    </header>
   );
 }

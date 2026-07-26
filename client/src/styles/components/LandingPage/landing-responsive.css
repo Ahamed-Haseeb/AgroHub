@@ -1,0 +1,13 @@
+/* Tablet */
+@media (max-width: 1024px) {
+  .stat-card {
+    padding: var(--sp-5);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .stat-card {
+    padding: var(--sp-4);
+  }
+}

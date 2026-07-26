@@ -1,0 +1,60 @@
+import { Star, Truck, Leaf } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { toast } from 'react-hot-toast';
+
+export default function ProductCard({ listing }) {
+  const { addItem } = useCart();
+  const filledStars = Math.round(listing.rating);
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(listing);
+    toast.success('Added to cart');
+  };
+
+  return (
+    <Link to={`/product/${listing.listing_id}`} className="product-card" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+      <div className="product-card-image">
+        <img src={listing.image_url} alt={listing.crop_name} />
+      </div>
+
+      <div className="product-card-body">
+        <div className="product-card-badges">
+          {listing.organic && <span className="badge badge-green"><Leaf size={12} className="badge-icon-inline" /> Organic</span>}
+          <span className="badge badge-muted">{listing.grade}</span>
+        </div>
+
+        <div className="product-card-name">{listing.crop_name}</div>
+        <div className="product-card-farmer">By {listing.farmer_name} • {listing.origin}</div>
+
+        <div className="product-card-rating">
+          <span className="product-rating-stars">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={11} fill={i < filledStars ? '#d4a24e' : 'none'} color={i < filledStars ? '#d4a24e' : 'var(--border)'} />
+            ))}
+          </span>
+          <span>({listing.orders} orders)</span>
+        </div>
+
+        <div className="product-card-price">
+          ₨ {listing.price_per_kg}<span className="unit">/kg</span>
+        </div>
+
+        <div className="product-card-avail">{listing.available_kg.toLocaleString()} kg available</div>
+
+        <div className="product-card-delivery">
+          <Truck size={12} />
+          Get it in {listing.delivery_days} day{listing.delivery_days > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <div className="product-card-footer">
+        <button className="btn btn-primary btn-block" onClick={handleAddToCart}>
+          Add to Cart
+        </button>
+      </div>
+    </Link>
+  );
+}

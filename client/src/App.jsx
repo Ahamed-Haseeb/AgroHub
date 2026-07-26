@@ -1,55 +1,74 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
-import LandingPage from './pages/LandingPage';
+import Storefront from './pages/Storefront';
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import BuyerMarketplace from './pages/buyer/BuyerMarketplace';
-import './index.css';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ProductPage from './pages/ProductPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderConfirmation from './pages/OrderConfirmation';
 
-function AppLayout() {
-  const location = useLocation();
-  const isFarmerDash = location.pathname.startsWith('/farmer');
-  const showFooter = !isFarmerDash;
-
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/"       element={<LandingPage />} />
-        <Route path="/farmer" element={<FarmerDashboard />} />
-        <Route path="/buyer"  element={<BuyerMarketplace />} />
-      </Routes>
-      {showFooter && <Footer />}
-
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: 'var(--bg-elevated)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '10px',
-            fontFamily: 'var(--font-body)',
-            fontSize: '14px',
-          },
-          success: {
-            iconTheme: { primary: '#22c55e', secondary: '#0f1a12' },
-          },
-          error: {
-            iconTheme: { primary: '#ef4444', secondary: '#0f1a12' },
-          },
-        }}
-      />
-    </>
-  );
-}
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<ProtectedRoute allowedRole="farmer" />}>
+              <Route path="/farmer" element={<FarmerDashboard />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRole="buyer" />}>
+              <Route path="/buyer" element={<BuyerMarketplace />} />
+            </Route>
+
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route element={<ProtectedRoute />}>
+              <Route path="/checkout" element={<><Navbar /><CheckoutPage /><Footer /></>} />
+              <Route path="/order-confirmation/:id" element={<><Navbar /><OrderConfirmation /><Footer /></>} />
+            </Route>
+
+            <Route
+              path="*"
+              element={
+                <>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Storefront />} />
+                    <Route path="/product/:id" element={<ProductPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                  </Routes>
+                  <Footer />
+                </>
+              }
+            />
+          </Routes>
+
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--bg-white)',
+                color: 'var(--text-heading)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                fontFamily: 'var(--font)',
+                fontSize: '14px',
+                boxShadow: 'var(--shadow-lg)',
+              },
+            }}
+          />
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }

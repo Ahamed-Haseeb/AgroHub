@@ -1,59 +1,93 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  ReferenceLine, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import {
   Leaf, LayoutDashboard, BarChart2, Bell, Package,
-  TrendingUp, AlertTriangle, CheckCircle, ChevronRight,
-  Sprout, ShoppingCart, Star, Zap, Info
+  AlertTriangle, CheckCircle, LogOut, Sprout, Info,
+  Settings, TrendingUp, ClipboardList, Menu,
+  Zap, Thermometer, ShieldCheck
 } from 'lucide-react';
-import { mockPrediction, cropAdvisory, harvestAlerts, availableCrops } from '../../data/mockData';
+import {
+  fetchPrediction, fetchAdvisory, fetchAlerts,
+  fetchAvailableCrops, fetchFarmerOrders, fetchMarketPrices,
+  fetchCrops, updateOrderStatus
+} from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
-// ── Custom Tooltip for SARIMA Chart ──
-function SarimaTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
+const getCropColor = (name) => {
+  const palettes = [
+    { bg: 'rgba(234, 88, 12, 0.1)', text: '#ea580c' },
+    { bg: 'rgba(168, 85, 247, 0.1)', text: '#a855f7' },
+    { bg: 'rgba(37, 99, 235, 0.1)', text: '#2563eb' },
+    { bg: 'rgba(22, 163, 74, 0.1)', text: '#16a34a' },
+    { bg: 'rgba(217, 119, 6, 0.1)', text: '#d97706' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return palettes[Math.abs(hash) % palettes.length];
+};
+
+const getInitials = (name) => {
+  const parts = name.split(' ');
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+};
+
+function MiniRadialProgress({ value, color = "var(--primary)" }) {
+  const radius = 20;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
   return (
-    <div style={{
-      background: 'var(--bg-elevated)',
-      border: '1px solid var(--border-default)',
-      borderRadius: 'var(--radius-md)',
-      padding: 'var(--space-4)',
-      fontSize: 'var(--text-sm)',
-      boxShadow: 'var(--shadow-lg)'
-    }}>
-      <p style={{ fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>{label}</p>
-      {payload.map(p => (
-        <p key={p.dataKey} style={{ color: p.color, marginBottom: 2 }}>
-          {p.name}: <strong>₨ {p.value?.toLocaleString('en-LK')}</strong>
-        </p>
-      ))}
-      {payload[0]?.payload?.lean_season && (
-        <div style={{
-          marginTop: 6, paddingTop: 6,
-          borderTop: '1px solid var(--border-subtle)',
-          color: 'var(--agro-amber-light)',
-          fontSize: 11, fontWeight: 600
-        }}>
-          ⚡ LEAN SEASON — High Volatility
-        </div>
-      )}
+    <div style={{ position: 'relative', width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+        <circle 
+          cx="24" cy="24" r={radius} 
+          stroke="var(--border-default)" strokeWidth="4" fill="none" 
+        />
+        <circle 
+          cx="24" cy="24" r={radius} 
+          stroke={color} strokeWidth="4" fill="none" 
+          strokeDasharray={circumference} 
+          strokeDashoffset={strokeDashoffset} 
+          strokeLinecap="round" 
+        />
+      </svg>
+      <div style={{ position: 'absolute', fontSize: '11px', fontWeight: 800, color: 'var(--text-primary)' }}>
+        {value}%
+      </div>
     </div>
   );
 }
 
-// ── Sidebar nav config ──
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="dash-tooltip">
+      <p className="dash-tooltip-title">{label}</p>
+      {payload.map(p => (
+        <p key={p.dataKey} className="dash-tooltip-item" style={{ color: p.color }}>
+          {p.name}: <strong>₨ {p.value?.toLocaleString('en-LK')}</strong>
+        </p>
+      ))}
+    </div>
+  );
+}
+
 const sidebarItems = [
-  { id: 'overview',    label: 'Overview',        icon: <LayoutDashboard size={16} /> },
-  { id: 'advisor',     label: 'Crop Advisor',     icon: <Sprout size={16} /> },
-  { id: 'forecast',    label: 'Price Forecast',   icon: <BarChart2 size={16} /> },
-  { id: 'alerts',      label: 'Harvest Alerts',   icon: <Bell size={16} /> },
-  { id: 'packaging',   label: 'Packaging',        icon: <Package size={16} /> },
-  { id: 'my-listings', label: 'My Listings',      icon: <ShoppingCart size={16} /> },
+  { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { id: 'advisor', label: 'Crops', icon: <Sprout size={18} /> },
+  { id: 'forecast', label: 'Analytics', icon: <BarChart2 size={18} /> },
+  { id: 'alerts', label: 'Orders', icon: <ClipboardList size={18} /> },
+  { id: 'packaging', label: 'Inventory', icon: <Package size={18} /> },
+  { id: 'my-listings', label: 'Market', icon: <TrendingUp size={18} /> },
+  { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
 ];
 
-// ── Packaging Checklist ──
 const packagingItems = [
   { id: 'p1', label: 'Ventilated plastic crates confirmed', required: true },
   { id: 'p2', label: 'Produce sorted by grade (A/A+)', required: true },
@@ -63,701 +97,549 @@ const packagingItems = [
   { id: 'p6', label: 'Cold chain pickup notified', required: false },
 ];
 
+
+
 export default function FarmerDashboard() {
-  const [activeTab, setActiveTab]         = useState('overview');
-  const [selectedCrop, setSelectedCrop]   = useState('ONION_BIG_LK');
-  const [checkedItems, setCheckedItems]   = useState({});
+  const { user: currentUser, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedCrop, setSelectedCrop] = useState('ONION_BIG_LK');
+  const [checkedItems, setCheckedItems] = useState({});
   const [dispatchReady, setDispatchReady] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const prediction = mockPrediction; // In prod: fetch from FastAPI
+
+  const { data: prediction } = useQuery({
+    queryKey: ['prediction', selectedCrop],
+    queryFn: () => fetchPrediction(selectedCrop),
+  });
+
+  const { data: cropPrices = [] } = useQuery({
+    queryKey: ['marketPrices'],
+    queryFn: fetchMarketPrices,
+  });
+
+  const { data: cropAdvisory = [] } = useQuery({
+    queryKey: ['advisory'],
+    queryFn: fetchAdvisory,
+  });
+
+  const { data: harvestAlerts = [] } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: fetchAlerts,
+  });
+
+  const { data: availableCrops = [] } = useQuery({
+    queryKey: ['availableCrops'],
+    queryFn: fetchAvailableCrops,
+  });
+
+  const { data: activeOrders = [], refetch: refetchOrders } = useQuery({
+    queryKey: ['farmerOrders'],
+    queryFn: fetchFarmerOrders,
+  });
+
+  const { data: allCrops = [] } = useQuery({
+    queryKey: ['crops'],
+    queryFn: () => fetchCrops(),
+  });
+  const myListings = allCrops.filter(c => c.farmer_name === currentUser?.name);
+
   const allChecked = packagingItems.filter(i => i.required).every(i => checkedItems[i.id]);
+  const toggleCheck = id => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
-  const toggleCheck = (id) => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const leanData = prediction.forecast.filter(d => d.lean_season);
-  const regularData = prediction.forecast.filter(d => !d.lean_season);
-
-  // Color bars for GARCH
-  const garchRisk = prediction.garch_metrics.risk_score;
-  const riskColor = garchRisk >= 70 ? 'var(--agro-red-light)' : garchRisk >= 45 ? 'var(--agro-amber-light)' : 'var(--agro-green-light)';
+  // Guard: don't render analytics if prediction hasn't loaded yet
+  const garchRisk = prediction?.garch_metrics?.risk_score ?? 0;
+  const riskColor = garchRisk >= 70 ? 'var(--red)' : garchRisk >= 45 ? 'var(--amber)' : 'var(--primary)';
   const riskLabel = garchRisk >= 70 ? 'High Risk' : garchRisk >= 45 ? 'Moderate Risk' : 'Low Risk';
 
   return (
-    <div className="dashboard-layout" style={{ paddingTop: 0 }}>
-      {/* ── SIDEBAR ── */}
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-logo">
-          <Leaf size={18} color="#22c55e" style={{ display: 'inline', marginRight: 6 }} />
-          AgroHub
-        </div>
+    <>
 
-        {/* Farmer profile */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
-          background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)',
-          marginBottom: 'var(--space-4)'
-        }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: 'var(--grad-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 700, color: '#fff', flexShrink: 0
-          }}>SP</div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>Suresh Perera</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Dambulla, Matale</div>
-          </div>
-          <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: 10 }}>JIT</span>
-        </div>
+      <div className="dash-mobile-header">
+        <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Leaf size={18} /> AgroHub
+        </Link>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="dash-mobile-menu-btn">
+          <Menu size={20} />
+        </button>
+      </div>
 
-        <div className="sidebar-section-label">Navigation</div>
-        {sidebarItems.map(item => (
-          <button
-            key={item.id}
-            id={`sidebar-${item.id}`}
-            onClick={() => setActiveTab(item.id)}
-            className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
-          >
-            {item.icon}
-            {item.label}
-            {item.id === 'alerts' && harvestAlerts.length > 0 && (
-              <span style={{
-                marginLeft: 'auto', minWidth: 18, height: 18,
-                background: 'var(--agro-amber)', borderRadius: 'var(--radius-full)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 700, color: '#fff'
-              }}>{harvestAlerts.length}</span>
-            )}
-          </button>
-        ))}
+      <div className="dashboard-layout">
+        <aside className={`dashboard-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
+          <Link to="/" className="sidebar-logo" style={{ textDecoration: 'none' }}>
+            <Leaf size={20} color="var(--bg-white)" />
+            AgroHub
+          </Link>
 
-        <div style={{ marginTop: 'auto', paddingTop: 'var(--space-6)' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(22,163,74,0.1), rgba(5,150,105,0.06))',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <div className="wave-bars" />
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--agro-green-light)' }}>AI Active</span>
-            </div>
-            <p style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              SARIMA model retrained.<br />
-              Next forecast: Monday 06:00
-            </p>
-          </div>
-        </div>
-      </aside>
-
-      {/* ── MAIN CONTENT ── */}
-      <main className="dashboard-main">
-
-        {/* ── OVERVIEW TAB ── */}
-        {activeTab === 'overview' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  Good evening, Suresh 👋
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  Monday, June 16, 2026 · Dambulla Region
-                </p>
-              </div>
-              <button id="dashboard-add-listing" className="btn btn-primary">
-                <Sprout size={16} /> New Listing
-              </button>
-            </div>
-
-            {/* KPI Row */}
-            <div className="dashboard-grid dashboard-grid-4" style={{ marginBottom: 'var(--space-6)' }}>
-              {[
-                { label: 'Active Listings', value: '3', icon: '🌱', trend: '+1 this week' },
-                { label: 'Pending Orders', value: '2', icon: '📦', trend: 'LKR 210,000' },
-                { label: 'Revenue (Jun)', value: '₨ 84K', icon: '💰', trend: '+23% vs May' },
-                { label: 'Waste Rate', value: '0%', icon: '♻️', trend: 'JIT Protected' },
-              ].map(kpi => (
-                <div key={kpi.label} className="stat-card">
-                  <div style={{ fontSize: 24 }}>{kpi.icon}</div>
-                  <div className="stat-value">{kpi.value}</div>
-                  <div className="stat-label">{kpi.label}</div>
-                  <div style={{ fontSize: 11, color: 'var(--agro-green-light)', marginTop: 2 }}>{kpi.trend}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Harvest Alert Banner */}
-            {harvestAlerts.map(alert => (
-              <div key={alert.id} className="harvest-alert" style={{ marginBottom: 'var(--space-6)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-4)' }}>
-                  <div style={{ marginTop: 2 }}>
-                    <div className="alert-indicator">
-                      <div className="alert-ping" />
-                      <div className="alert-dot" />
-                    </div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
-                      marginBottom: 'var(--space-2)'
-                    }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--text-lg)' }}>
-                        🔔 JIT Harvest Alert — {alert.crop}
-                      </span>
-                      <span className="badge badge-amber">CONFIRMED</span>
-                    </div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-3)' }}>
-                      {alert.message}
-                    </p>
-                    <div style={{ display: 'flex', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
-                      {[
-                        ['Buyer', alert.buyer],
-                        ['Qty', `${alert.quantity_kg.toLocaleString()} kg`],
-                        ['Order Value', `₨ ${alert.order_value_lkr.toLocaleString('en-LK')}`],
-                        ['Window', alert.harvest_window],
-                      ].map(([k, v]) => (
-                        <div key={k}>
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</div>
-                          <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>{v}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <button id="alert-confirm-harvest" className="btn btn-amber btn-sm" style={{ flexShrink: 0 }}>
-                    Confirm Harvest
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* Mini SARIMA Chart */}
-            <div className="chart-container">
-              <div className="flex-between" style={{ marginBottom: 'var(--space-4)' }}>
-                <div>
-                  <div className="chart-title">Big Onion — Price Forecast</div>
-                  <div className="chart-subtitle">SARIMA(3,1,2)(0,0,2)[52] · Next 52 weeks · LKR/kg</div>
-                </div>
-                <button
-                  id="view-full-forecast"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => setActiveTab('forecast')}
-                >
-                  Full Analysis <ChevronRight size={14} />
-                </button>
-              </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={prediction.forecast} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#16a34a" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="leanGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#d97706" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.06)" />
-                  <XAxis dataKey="week_label" tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
-                  <YAxis tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `₨${v}`} />
-                  <Tooltip content={<SarimaTooltip />} />
-                  <Area type="monotone" dataKey="upper_ci" stroke="none" fill="url(#priceGrad)" fillOpacity={0.2} name="Upper CI" />
-                  <Area type="monotone" dataKey="price"    stroke="#22c55e" strokeWidth={2} fill="url(#priceGrad)" name="Forecast Price" />
-                  <Area type="monotone" dataKey="lower_ci" stroke="none" fill="none" name="Lower CI" />
-                  <ReferenceLine y={300} stroke="rgba(217,119,6,0.4)" strokeDasharray="4 3" label={{ value: 'Lean Season', fill: '#d97706', fontSize: 10 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {/* ── CROP ADVISOR TAB ── */}
-        {activeTab === 'advisor' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  Strategic Crop Advisor 🌿
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  AI-powered recommendations based on national import gaps and market forecasts
-                </p>
-              </div>
-            </div>
-
-            {/* Advisory Banner */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(22,163,74,0.08) 0%, rgba(13,148,136,0.05) 100%)',
-              border: '1px solid var(--border-default)',
-              borderRadius: 'var(--radius-xl)', padding: 'var(--space-6)',
-              marginBottom: 'var(--space-6)', display: 'flex',
-              alignItems: 'flex-start', gap: 'var(--space-4)'
-            }}>
-              <div style={{ fontSize: 28, marginTop: 2 }}>🤖</div>
-              <div>
-                <div style={{ fontWeight: 700, fontFamily: 'var(--font-display)', marginBottom: 6 }}>
-                  AI Analysis — June 2026 Report
-                </div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
-                  Based on CMC wholesale data, DOA import statistics, and SARIMA models for Q3 2026,
-                  these crops show the highest ROI potential for your Dambulla region.
-                  All forecasts account for GARCH volatility adjustments.
-                </p>
-              </div>
-            </div>
-
-            {/* Advisory Cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-              {cropAdvisory.map((item, i) => (
-                <div
-                  key={item.id}
-                  className="card"
-                  style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 'var(--space-5)',
-                    borderColor: item.urgency === 'high' ? 'rgba(22,163,74,0.30)' :
-                                 item.urgency === 'medium' ? 'rgba(217,119,6,0.20)' : 'var(--border-subtle)',
-                    animation: `fadeInUp 0.4s ease ${i * 0.1}s both`
-                  }}
-                >
-                  <div style={{
-                    width: 64, height: 64, borderRadius: 'var(--radius-lg)',
-                    background: 'var(--bg-muted)', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    fontSize: 36, flexShrink: 0
-                  }}>{item.icon}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--text-xl)' }}>
-                        {item.crop}
-                      </h3>
-                      <span className={`badge ${item.urgency === 'high' ? 'badge-green' : item.urgency === 'medium' ? 'badge-amber' : 'badge-muted'}`}>
-                        {item.urgency === 'high' ? 'Top Pick' : item.urgency === 'medium' ? 'Recommended' : 'Stable'}
-                      </span>
-                    </div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', lineHeight: 1.7, marginBottom: 'var(--space-3)' }}>
-                      {item.reason}
-                    </p>
-                    <div style={{ display: 'flex', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
-                      {[
-                        ['Est. ROI', item.roi_estimate, 'var(--agro-green-light)'],
-                        ['Risk Level', item.risk, item.risk === 'Low' ? 'var(--agro-green-light)' : 'var(--agro-amber-light)'],
-                        ['Season', item.season, 'var(--text-secondary)'],
-                      ].map(([k, v, c]) => (
-                        <div key={k}>
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>{k}</div>
-                          <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: c }}>{v}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <button id={`advisor-select-${item.id}`} className="btn btn-outline btn-sm">
-                    Select Crop
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── PRICE FORECAST TAB ── */}
-        {activeTab === 'forecast' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  Predictive Market Hub 📊
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  SARIMA + GARCH model outputs · Weekly LKR/kg forecasts
-                </p>
-              </div>
-              {/* Crop selector */}
-              <select
-                id="forecast-crop-select"
-                className="input select"
-                style={{ width: 200 }}
-                value={selectedCrop}
-                onChange={e => setSelectedCrop(e.target.value)}
+          <div className="sidebar-nav">
+            {sidebarItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
               >
-                {availableCrops.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="sidebar-user">
+            <div className="sidebar-avatar">{currentUser ? getInitials(currentUser.name) : 'SP'}</div>
+            <div>
+              <div className="sidebar-user-name">{currentUser ? currentUser.name : 'Loading...'}</div>
+              <div className="sidebar-user-role">{currentUser ? currentUser.role : 'Farmer'}</div>
             </div>
+          </div>
 
-            {/* GARCH Metrics Row */}
-            <div className="dashboard-grid dashboard-grid-3" style={{ marginBottom: 'var(--space-6)' }}>
-              <div className="stat-card" style={{ borderColor: 'rgba(37,99,235,0.20)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ color: '#60a5fa', fontSize: 13, fontWeight: 700 }}>GARCH(1,1) Model</span>
-                </div>
-                <div className="stat-value" style={{ fontSize: 'var(--text-2xl)' }}>
-                  {(prediction.garch_metrics.current_volatility * 100).toFixed(1)}%
-                </div>
-                <div className="stat-label">Current Volatility (σ)</div>
-                <div className="gauge-bar" style={{ marginTop: 12 }}>
-                  <div className="gauge-fill gauge-medium" style={{ width: `${prediction.garch_metrics.current_volatility * 300}%` }} />
-                </div>
-              </div>
+          <button className="sidebar-logout" onClick={() => {
+            logout();
+            window.location.href = '/login';
+          }}>
+            <LogOut size={16} />
+            Log out
+          </button>
+        </aside>
 
-              <div className="stat-card" style={{ borderColor: `rgba(217,119,6,0.20)` }}>
-                <div style={{ marginBottom: 8 }}>
-                  <span style={{ color: riskColor, fontSize: 13, fontWeight: 700 }}>Risk Assessment</span>
-                </div>
-                <div className="stat-value" style={{ fontSize: 'var(--text-2xl)', background: 'none', WebkitTextFillColor: riskColor, color: riskColor }}>
-                  {garchRisk}/100
-                </div>
-                <div className="stat-label">{riskLabel}</div>
-                <div className="gauge-bar" style={{ marginTop: 12 }}>
-                  <div className="gauge-fill gauge-high" style={{ width: `${garchRisk}%` }} />
-                </div>
-              </div>
+        <main className="dashboard-main">
 
-              <div className="stat-card" style={{ borderColor: 'rgba(22,163,74,0.20)' }}>
-                <div style={{ marginBottom: 8 }}>
-                  <span style={{ color: 'var(--agro-green-light)', fontSize: 13, fontWeight: 700 }}>Forecast Confidence</span>
-                </div>
-                <div className="stat-value" style={{ fontSize: 'var(--text-2xl)' }}>
-                  {(prediction.garch_metrics.forecast_confidence * 100).toFixed(0)}%
-                </div>
-                <div className="stat-label">Model Accuracy</div>
-                <div className="gauge-bar" style={{ marginTop: 12 }}>
-                  <div className="gauge-fill gauge-low" style={{ width: `${prediction.garch_metrics.forecast_confidence * 100}%` }} />
-                </div>
-              </div>
-            </div>
-
-            {/* SARIMA Full Chart */}
-            <div className="chart-container" style={{ marginBottom: 'var(--space-6)' }}>
-              <div className="chart-title">52-Week SARIMA Price Forecast — {prediction.crop_name}</div>
-              <div className="chart-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <span>{prediction.model} · Confidence Interval: 95%</span>
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 4,
-                  background: 'rgba(217,119,6,0.1)', border: '1px solid rgba(217,119,6,0.25)',
-                  borderRadius: 'var(--radius-full)', padding: '2px 8px',
-                  fontSize: 11, color: 'var(--agro-amber-light)', fontWeight: 600
-                }}>
-                  ⚡ Lean Seasons: Weeks 21–29, 49–52
-                </span>
-              </div>
-              <ResponsiveContainer width="100%" height={320}>
-                <AreaChart data={prediction.forecast} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="sarmaGradFull" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#16a34a" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="ciGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#22c55e" stopOpacity={0.08} />
-                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.06)" />
-                  <XAxis dataKey="week_label" tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} interval={3} />
-                  <YAxis tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `₨${v}`} />
-                  <Tooltip content={<SarimaTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 12, color: '#6b8f6b' }} />
-                  <Area type="monotone" dataKey="upper_ci" name="Upper CI" stroke="rgba(34,197,94,0.3)" strokeWidth={1} fill="url(#ciGrad)" strokeDasharray="4 2" />
-                  <Area type="monotone" dataKey="price"    name="SARIMA Forecast (₨/kg)" stroke="#22c55e" strokeWidth={2.5} fill="url(#sarmaGradFull)" dot={(props) => {
-                    if (!props.payload.lean_season) return null;
-                    return <circle key={props.key} cx={props.cx} cy={props.cy} r={4} fill="#d97706" stroke="#f59e0b" strokeWidth={1.5} />;
-                  }} />
-                  <Area type="monotone" dataKey="lower_ci" name="Lower CI" stroke="rgba(34,197,94,0.3)" strokeWidth={1} fill="none" strokeDasharray="4 2" />
-                  <ReferenceLine y={400} stroke="rgba(217,119,6,0.6)" strokeDasharray="5 3" label={{ value: 'Peak Lean', fill: '#d97706', fontSize: 10, position: 'right' }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* GARCH Volatility Chart */}
-            <div className="chart-container">
-              <div className="chart-title">GARCH(1,1) Volatility Surface</div>
-              <div className="chart-subtitle">Conditional variance (σ) throughout the year — higher = more price risk</div>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={prediction.garch_metrics.volatility_history} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(34,197,94,0.06)" />
-                  <XAxis dataKey="week" tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#6b8f6b', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => (v * 100).toFixed(0) + '%'} />
-                  <Tooltip
-                    formatter={(v) => [(v * 100).toFixed(1) + '%', 'Volatility (σ)']}
-                    contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: 8, fontSize: 12 }}
-                    labelStyle={{ color: 'var(--text-primary)' }}
-                  />
-                  <Bar dataKey="sigma" fill="#16a34a" radius={[3,3,0,0]}
-                    label={false}
-                    style={{ fill: 'url(#barGrad)' }}
-                  >
-                    {prediction.garch_metrics.volatility_history.map((entry, index) => (
-                      <rect
-                        key={`bar-${index}`}
-                        fill={entry.sigma > 0.25 ? '#d97706' : entry.sigma > 0.18 ? '#059669' : '#16a34a'}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-              <div style={{
-                marginTop: 'var(--space-4)', padding: 'var(--space-4)',
-                background: 'rgba(22,163,74,0.05)', border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <Info size={14} color="var(--agro-green-light)" style={{ marginTop: 2, flexShrink: 0 }} />
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>AI Recommendation: </strong>
-                    {prediction.garch_metrics.recommendation}
+          {activeTab === 'overview' && (
+            <div className="animate-fade-in">
+              <div className="dash-header">
+                <div>
+                  <h1 className="dash-page-title">Dashboard Overview</h1>
+                  <p className="dash-page-date">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
+                <button className="dash-notify-btn"><Bell size={18} /></button>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* ── HARVEST ALERTS TAB ── */}
-        {activeTab === 'alerts' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  JIT Harvest Alerts 🔔
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  Harvest ONLY when triggered. Zero waste guarantee.
-                </p>
-              </div>
-            </div>
-
-            <div style={{
-              background: 'rgba(217,119,6,0.06)',
-              border: '1px solid rgba(217,119,6,0.20)',
-              borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)',
-              marginBottom: 'var(--space-6)',
-              display: 'flex', alignItems: 'center', gap: 'var(--space-3)'
-            }}>
-              <AlertTriangle size={20} color="var(--agro-amber)" />
-              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-                <strong style={{ color: 'var(--agro-amber-light)' }}>AgroHub Policy:</strong> Crop status changes to "Harvest Triggered" only after advance buyer payment is validated. No speculative harvests.
-              </p>
-            </div>
-
-            {harvestAlerts.map(alert => (
-              <div key={alert.id} className="card-glow" style={{ marginBottom: 'var(--space-5)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-5)' }}>
-                  <div style={{ fontSize: 40 }}>🧅</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--text-xl)' }}>
-                        {alert.crop} — Order #{alert.id}
-                      </h3>
-                      <span className="badge badge-amber">HARVEST WINDOW OPEN</span>
+              <div className="dash-content">
+                <div className="crop-price-stack">
+                  {cropPrices.map(crop => (
+                    <div key={crop.rank} className="crop-price-card">
+                      <div className="crop-price-rank">{crop.rank}. {crop.name}</div>
+                      <div className="crop-price-value">{crop.price}</div>
+                      <div className={`crop-price-change ${crop.direction}`}>
+                        {crop.change}, {crop.label}
+                      </div>
+                      <div className="crop-price-updated">{crop.updated}</div>
                     </div>
-                    <div style={{
-                      display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-                      gap: 'var(--space-4)', marginBottom: 'var(--space-5)'
-                    }}>
-                      {[
-                        ['Buyer', alert.buyer],
-                        ['Quantity', `${alert.quantity_kg.toLocaleString()} kg`],
-                        ['Total Value', `₨ ${alert.order_value_lkr.toLocaleString('en-LK')}`],
-                        ['Harvest By', alert.harvest_window],
-                      ].map(([k, v]) => (
-                        <div key={k} style={{
-                          background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)',
-                          padding: 'var(--space-3)'
-                        }}>
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{k}</div>
-                          <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{v}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <p style={{
-                      background: 'rgba(217,119,6,0.08)',
-                      border: '1px solid rgba(217,119,6,0.20)',
-                      borderRadius: 'var(--radius-md)', padding: 'var(--space-3)',
-                      fontSize: 'var(--text-sm)', color: 'var(--agro-amber-light)', fontWeight: 500
-                    }}>
-                      ⚡ {alert.message}
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-5)' }}>
-                  <button id={`alert-reject-${alert.id}`} className="btn btn-outline btn-sm">Request Rescheduling</button>
-                  <button id={`alert-accept-${alert.id}`} className="btn btn-amber">
-                    ✓ Confirm — Begin Harvest
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── PACKAGING CHECKLIST TAB ── */}
-        {activeTab === 'packaging' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  Packaging Mandate 📦
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  Complete this checklist before dispatch. Required for JIT compliance.
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 'var(--space-6)' }}>
-              {/* Checklist */}
-              <div className="card-elevated">
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--text-xl)', marginBottom: 'var(--space-5)' }}>
-                  Pre-Dispatch Checklist
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                  {packagingItems.map(item => (
-                    <label
-                      key={item.id}
-                      htmlFor={`check-${item.id}`}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 'var(--space-4)',
-                        background: checkedItems[item.id] ? 'rgba(22,163,74,0.08)' : 'var(--bg-elevated)',
-                        border: `1px solid ${checkedItems[item.id] ? 'rgba(22,163,74,0.25)' : 'var(--border-subtle)'}`,
-                        borderRadius: 'var(--radius-md)', padding: 'var(--space-4)',
-                        cursor: 'pointer', transition: 'var(--transition-base)'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        id={`check-${item.id}`}
-                        checked={!!checkedItems[item.id]}
-                        onChange={() => toggleCheck(item.id)}
-                        style={{ width: 18, height: 18, accentColor: 'var(--agro-green)', cursor: 'pointer' }}
-                      />
-                      <span style={{
-                        flex: 1, fontSize: 'var(--text-sm)', fontWeight: 500,
-                        color: checkedItems[item.id] ? 'var(--text-primary)' : 'var(--text-secondary)',
-                        textDecoration: checkedItems[item.id] ? 'line-through' : 'none',
-                        transition: 'var(--transition-fast)'
-                      }}>{item.label}</span>
-                      {item.required && <span className="badge badge-red" style={{ fontSize: 9 }}>Required</span>}
-                      {checkedItems[item.id] && <CheckCircle size={16} color="var(--agro-green-light)" />}
-                    </label>
                   ))}
                 </div>
 
-                <div style={{ marginTop: 'var(--space-6)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
-                    <span>Completion</span>
-                    <span style={{ color: allChecked ? 'var(--agro-green-light)' : 'var(--text-primary)', fontWeight: 700 }}>
-                      {Object.values(checkedItems).filter(Boolean).length}/{packagingItems.length}
-                    </span>
-                  </div>
-                  <div className="gauge-bar">
-                    <div
-                      className={`gauge-fill ${allChecked ? 'gauge-low' : 'gauge-medium'}`}
-                      style={{ width: `${(Object.values(checkedItems).filter(Boolean).length / packagingItems.length) * 100}%`, transition: 'width 0.4s ease' }}
-                    />
-                  </div>
+                <div className="dash-chart-card">
+                  <div className="dash-chart-title">Crop Price Forecast (Next 6 Months)</div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    {prediction ? (
+                    <LineChart data={prediction.forecast.slice(0, 12)} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="week_label" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
+                      <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 13 }} axisLine={false} tickLine={false} tickFormatter={v => `₨${v}`} />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} iconType="plainline" />
+                      <Line type="monotone" dataKey="price" name="Forecast Price" stroke="var(--primary)" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                    </LineChart>
+                    ) : (
+                      <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Loading forecast chart...</div>
+                    )}
+                  </ResponsiveContainer>
                 </div>
+              </div>
 
-                <button
-                  id="packaging-dispatch-btn"
-                  className={`btn ${allChecked ? 'btn-primary' : 'btn-outline'} btn-lg`}
-                  style={{ width: '100%', marginTop: 'var(--space-5)', justifyContent: 'center' }}
-                  disabled={!allChecked}
-                  onClick={() => setDispatchReady(true)}
-                >
-                  {allChecked ? '✓ Ready for Dispatch' : 'Complete All Required Items'}
-                </button>
+              <div className="orders-section">
+                <div className="orders-card">
+                  <div className="orders-title">Active Orders</div>
+                  <table className="orders-table">
+                    <thead>
+                      <tr><th>Order #</th><th>Items</th><th>Buyer</th><th>Total</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                      {activeOrders.map(order => (
+                        <tr key={order._id}>
+                          <td className="fw-600">{order.order_number}</td>
+                          <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
+                          <td>{order.buyer?.name || '—'}</td>
+                          <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
+                          <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
+                          <td>
+                            {order.status === 'Pending' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Confirmed'); refetchOrders(); }}>Confirm</button>
+                            )}
+                            {order.status === 'Confirmed' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Processing'); refetchOrders(); }}>Process</button>
+                            )}
+                            {order.status === 'Processing' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Shipped'); refetchOrders(); }}>Ship</button>
+                            )}
+                            {order.status === 'Shipped' && (
+                              <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Delivered'); refetchOrders(); }}>Delivered</button>
+                            )}
+                            {(order.status === 'Delivered' || order.status === 'Cancelled') && <span style={{color:'var(--text-muted)', fontSize: 13}}>Done</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
-                {dispatchReady && (
-                  <div className="harvest-alert" style={{ marginTop: 'var(--space-4)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <CheckCircle size={16} color="var(--agro-green-light)" />
-                      <span style={{ color: 'var(--agro-green-light)', fontWeight: 700, fontSize: 'var(--text-sm)' }}>
-                        Dispatch confirmed! Logistics partner notified.
-                      </span>
+
+          {activeTab === 'advisor' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Crop Advisor</h1>
+              <p className="dash-page-date">Market recommendations based on national import gaps</p>
+
+              <div className="dash-info-banner advisor-banner">
+                <TrendingUp size={22} color="var(--primary)" />
+                <div>
+                  <div className="advisor-banner-title">
+                    Market Analysis — {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </div>
+                  <p className="advisor-banner-text">
+                    Based on CMC wholesale data and SARIMA models for Q3 2026, these crops show the highest ROI for Dambulla.
+                  </p>
+                </div>
+              </div>
+
+              <div className="advisor-card-list">
+                {cropAdvisory.map(item => {
+                  const color = getCropColor(item.crop);
+                  return (
+                  <div key={item.advisory_id} className="dash-info-card advisor-card">
+                    <div className="advisor-card-icon" style={{ background: 'transparent' }}>
+                      <MiniRadialProgress 
+                        value={parseInt(item.roi_estimate.replace(/[^0-9]/g, '')) || 0} 
+                        color={color.text} 
+                      />
+                    </div>
+                    <div className="advisor-card-content">
+                      <div className="advisor-card-header">
+                        <h3 className="advisor-card-title">{item.crop}</h3>
+                        <span className={`badge ${item.urgency === 'high' ? 'badge-green' : item.urgency === 'medium' ? 'badge-amber' : 'badge-muted'}`}>
+                          {item.urgency === 'high' ? 'Top Pick' : item.urgency === 'medium' ? 'Recommended' : 'Stable'}
+                        </span>
+                      </div>
+                      <p className="advisor-card-desc">{item.reason}</p>
+                      <div className="advisor-card-metrics">
+                        {[['ROI', item.roi_estimate, 'var(--primary)'], ['Risk', item.risk, item.risk === 'Low' ? 'var(--primary)' : 'var(--amber)'], ['Season', item.season, 'var(--text-body)']].map(([k, v, c]) => (
+                          <div key={k}>
+                            <div className="dash-detail-label">{k}</div>
+                            <div className="advisor-card-metric-val" style={{ color: c }}>{v}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button className="btn btn-outline btn-sm">Select</button>
+                  </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+
+          {activeTab === 'forecast' && (
+            <div className="animate-fade-in">
+              {!prediction ? (
+                <div style={{ padding: 'var(--sp-10)', textAlign: 'center', color: 'var(--text-muted)' }}>Loading analytics...</div>
+              ) : (
+              <>
+              <div className="dash-header dash-header-spaced">
+                <div>
+                  <h1 className="dash-page-title">Analytics</h1>
+                  <p className="dash-page-date">SARIMA + GARCH model outputs · Weekly LKR/kg</p>
+                </div>
+                <select className="input select dash-crop-select" value={selectedCrop} onChange={e => setSelectedCrop(e.target.value)}>
+                  {availableCrops.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+
+              <div className="dash-metric-grid dash-metric-grid-spaced">
+                {[
+                  { label: 'GARCH(1,1) Volatility', value: `${(prediction.garch_metrics.current_volatility * 100).toFixed(1)}%`, sub: 'Current σ', color: 'var(--blue)', pct: prediction.garch_metrics.current_volatility * 300, gaugeClass: 'gauge-amber' },
+                  { label: 'Risk Score', value: `${garchRisk}/100`, sub: riskLabel, color: riskColor, pct: garchRisk, gaugeClass: garchRisk >= 70 ? 'gauge-red' : garchRisk >= 45 ? 'gauge-amber' : 'gauge-green' },
+                  { label: 'Forecast Confidence', value: `${(prediction.garch_metrics.forecast_confidence * 100).toFixed(0)}%`, sub: 'Model accuracy', color: 'var(--primary)', pct: prediction.garch_metrics.forecast_confidence * 100, gaugeClass: 'gauge-green' },
+                ].map(card => (
+                  <div key={card.label} className="dash-metric-card">
+                    <div className="dash-metric-label" style={{ color: card.color }}>{card.label}</div>
+                    <div className="dash-metric-value">{card.value}</div>
+                    <div className="dash-metric-sub">{card.sub}</div>
+                    <div className="gauge-bar"><div className={`gauge-fill ${card.gaugeClass}`} style={{ width: `${Math.min(card.pct, 100)}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="dash-chart-card dash-chart-card-spaced">
+                <div className="dash-chart-title">52-Week SARIMA Forecast — {prediction.crop_name}</div>
+                <div className="dash-chart-meta">
+                  <span className="dash-chart-model">{prediction.model} · 95% CI</span>
+                  <span className="badge badge-amber"><Zap size={12} style={{ display: 'inline', marginRight: 4 }} /> Lean: Weeks 21–29, 49–52</span>
+                </div>
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={prediction.forecast} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="sarGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="week_label" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} interval={3} />
+                    <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₨${v}`} />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Area type="monotone" dataKey="upper_ci" name="Upper CI" stroke="var(--border-hover)" strokeWidth={1} fill="none" strokeDasharray="4 2" />
+                    <Area type="monotone" dataKey="price" name="Forecast (₨/kg)" stroke="var(--primary)" strokeWidth={2.5} fill="url(#sarGrad)"
+                      dot={props => {
+                        if (!props.payload.lean_season) return null;
+                        return <circle key={props.key} cx={props.cx} cy={props.cy} r={4} fill="var(--amber)" stroke="var(--amber-light)" strokeWidth={1.5} />;
+                      }}
+                    />
+                    <Area type="monotone" dataKey="lower_ci" name="Lower CI" stroke="var(--border-hover)" strokeWidth={1} fill="none" strokeDasharray="4 2" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="dash-chart-card">
+                <div className="dash-chart-title">GARCH(1,1) Volatility Surface</div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={prediction.garch_metrics.volatility_history} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="week" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => (v * 100).toFixed(0) + '%'} />
+                    <Tooltip formatter={v => [(v * 100).toFixed(1) + '%', 'Volatility (σ)']} contentStyle={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: 13 }} />
+                    <Bar dataKey="sigma" radius={[4, 4, 0, 0]}>
+                      {prediction.garch_metrics.volatility_history.map((entry, index) => (
+                        <rect key={`bar-${index}`} fill={entry.sigma > 0.25 ? 'var(--amber)' : entry.sigma > 0.18 ? 'var(--primary)' : 'var(--primary-light)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="dash-info-banner dash-info-banner-mt">
+                  <Info size={14} color="var(--primary)" className="dash-info-icon" />
+                  <p className="dash-info-text">
+                    <strong>Market Recommendation: </strong>{prediction.garch_metrics.recommendation}
+                  </p>
+                </div>
+              </div>
+              </>
+              )}
+            </div>
+          )}
+
+
+          {activeTab === 'alerts' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Orders</h1>
+              <p className="dash-page-date">JIT harvest alerts and active order management</p>
+
+              <div className="dash-policy-banner">
+                <AlertTriangle size={18} color="var(--amber)" />
+                <p className="dash-policy-text"><strong>Policy:</strong> Harvest is triggered only after buyer payment is validated.</p>
+              </div>
+
+              {harvestAlerts.map(alert => (
+                <div key={alert.alert_id} className="dash-alert-card">
+                  <div className="dash-alert-layout">
+                    <div className="dash-alert-icon"><Bell size={24} color="var(--primary)" /></div>
+                    <div className="advisor-card-content">
+                      <div className="dash-alert-header">
+                        <h3 className="dash-alert-title">{alert.crop} — {alert.alert_id}</h3>
+                        <span className="status-badge status-processing">Harvest Window</span>
+                      </div>
+                      <div className="dash-detail-grid dash-detail-grid-spaced">
+                        {[['Buyer', alert.buyer], ['Quantity', `${alert.quantity_kg.toLocaleString()} kg`], ['Value', `₨ ${alert.order_value_lkr.toLocaleString('en-LK')}`], ['Window', alert.harvest_window]].map(([k, v]) => (
+                          <div key={k} className="dash-detail-item">
+                            <div className="dash-detail-label">{k}</div>
+                            <div className="dash-detail-value">{v}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                  <div className="dash-alert-actions">
+                    <button className="btn btn-outline btn-sm">Reschedule</button>
+                    <button className="btn btn-primary"><CheckCircle size={16} style={{ display: 'inline', marginRight: 8 }} /> Confirm Harvest</button>
+                  </div>
+                </div>
+              ))}
 
-              {/* Packaging Guide */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <div className="card">
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-3)' }}>
-                    📦 Crate Standard
-                  </h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
-                    Use <strong style={{ color: 'var(--text-primary)' }}>ventilated plastic crates</strong> (Type-3 HDPE) with a minimum 12% open area.
-                    Max load: <strong style={{ color: 'var(--text-primary)' }}>25 kg per crate.</strong>
-                  </p>
+              <div className="orders-card orders-card-spaced">
+                <div className="orders-title">All Orders</div>
+                <table className="orders-table">
+                  <thead><tr><th>Order #</th><th>Items</th><th>Buyer</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+                  <tbody>
+                    {activeOrders.map(order => (
+                      <tr key={order._id}>
+                        <td className="fw-600">{order.order_number}</td>
+                        <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
+                        <td>{order.buyer?.name || '—'}</td>
+                        <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
+                        <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
+                        <td>
+                          {order.status === 'Pending' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Confirmed'); refetchOrders(); }}>Confirm</button>
+                          )}
+                          {order.status === 'Confirmed' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Processing'); refetchOrders(); }}>Process</button>
+                          )}
+                          {order.status === 'Processing' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Shipped'); refetchOrders(); }}>Ship</button>
+                          )}
+                          {order.status === 'Shipped' && (
+                            <button className="btn btn-primary btn-sm" onClick={async () => { await updateOrderStatus(order._id, 'Delivered'); refetchOrders(); }}>Delivered</button>
+                          )}
+                          {(order.status === 'Delivered' || order.status === 'Cancelled') && <span style={{color:'var(--text-muted)', fontSize: 13}}>Done</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+
+          {activeTab === 'packaging' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Inventory & Packaging</h1>
+              <p className="dash-page-date">Pre-dispatch checklist and compliance</p>
+
+              <div className="dash-inventory-layout">
+                <div className="dash-info-card dash-info-card-large">
+                  <h3 className="dash-checklist-title">Pre-Dispatch Checklist</h3>
+                  <div className="dash-checklist">
+                    {packagingItems.map(item => (
+                      <label
+                        key={item.id}
+                        htmlFor={`check-${item.id}`}
+                        className={`dash-checklist-item ${checkedItems[item.id] ? 'checked' : ''}`}
+                      >
+                        <input
+                          type="checkbox" id={`check-${item.id}`}
+                          checked={!!checkedItems[item.id]}
+                          onChange={() => toggleCheck(item.id)}
+                          className="dash-checklist-checkbox"
+                        />
+                        <span className={`dash-checklist-label ${checkedItems[item.id] ? 'done' : ''}`}>{item.label}</span>
+                        {item.required && <span className="badge badge-red badge-small">Required</span>}
+                        {checkedItems[item.id] && <CheckCircle size={16} color="var(--primary)" />}
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="dash-progress-section">
+                    <div className="dash-progress-bar">
+                      <span>Progress</span>
+                      <span className="fw-700 text-heading">{checkedCount}/{packagingItems.length}</span>
+                    </div>
+                    <div className="gauge-bar">
+                      <div className={`gauge-fill ${allChecked ? 'gauge-green' : 'gauge-amber'}`}
+                        style={{ width: `${(checkedCount / packagingItems.length) * 100}%` }} />
+                    </div>
+                  </div>
+
+                  <button
+                    className={`btn ${allChecked ? 'btn-primary' : 'btn-outline'} btn-block btn-lg dash-checklist-submit`}
+                    disabled={!allChecked}
+                    onClick={() => setDispatchReady(true)}
+                  >
+                    {allChecked ? <><CheckCircle size={16} style={{ display: 'inline', marginRight: 8 }} /> Ready for Dispatch</> : 'Complete All Required Items'}
+                  </button>
+
+                  {dispatchReady && (
+                    <div className="dash-dispatch-success">
+                      <CheckCircle size={16} color="var(--primary)" />
+                      <span className="dash-dispatch-success-text">Dispatch confirmed!</span>
+                    </div>
+                  )}
                 </div>
-                <div className="card">
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-3)' }}>
-                    🌡️ Temperature
-                  </h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
-                    Store at <strong style={{ color: 'var(--text-primary)' }}>18–24°C</strong> post-harvest.
-                    Cold chain vehicle will maintain <strong style={{ color: 'var(--text-primary)' }}>8–12°C</strong> during transport.
-                  </p>
-                </div>
-                <div className="card" style={{ background: 'rgba(22,163,74,0.04)' }}>
-                  <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 'var(--space-3)' }}>
-                    🏆 JIT Compliance
-                  </h4>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
-                    Compliance score: <strong style={{ color: 'var(--agro-green-light)' }}>98/100</strong>.
-                    Farmers with &gt;95 score receive premium buyer placement and advance order priority.
-                  </p>
+
+                <div className="advisor-card-list">
+                  {[
+                    { icon: <Package size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Crate Standard', text: 'Ventilated plastic crates (Type-3 HDPE), minimum 12% open area. Max: 25 kg/crate.' },
+                    { icon: <Thermometer size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Temperature', text: 'Post-harvest: 18–24°C. Cold chain transit: 8–12°C.' },
+                    { icon: <ShieldCheck size={16} style={{ display: 'inline', marginRight: 8, color: 'var(--text-muted)' }} />, title: 'Compliance', text: 'Your score: 98/100. >95 = premium buyer placement.' },
+                  ].map(c => (
+                    <div key={c.title} className="dash-info-card dash-info-item">
+                      <h4 className="dash-info-item-title" style={{ display: 'flex', alignItems: 'center' }}>{c.icon}{c.title}</h4>
+                      <p className="advisor-banner-text">{c.text}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── MY LISTINGS TAB ── */}
-        {activeTab === 'my-listings' && (
-          <div className="page-enter">
-            <div className="dashboard-header">
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 800 }}>
-                  My Crop Listings 🌾
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>
-                  Manage your active marketplace listings
-                </p>
+
+          {activeTab === 'my-listings' && (
+            <div className="animate-fade-in">
+              <div className="dash-header dash-header-spaced">
+                <div>
+                  <h1 className="dash-page-title">My Listings</h1>
+                  <p className="dash-page-date">Manage your active marketplace listings</p>
+                </div>
+                <button className="btn btn-primary"><Sprout size={16} /> Add Listing</button>
               </div>
-              <button id="add-new-listing-btn" className="btn btn-primary">
-                <Sprout size={16} /> Add Listing
-              </button>
+
+              <div className="orders-card">
+                <table className="orders-table">
+                  <thead><tr><th>Crop</th><th>Quantity</th><th>Price</th><th>Status</th><th>Harvest Date</th><th></th></tr></thead>
+                  <tbody>
+                    {myListings.length === 0 ? (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', padding: 'var(--space-8)' }}>No active listings found.</td></tr>
+                    ) : (
+                      myListings.map(l => (
+                        <tr key={l.listing_id}>
+                          <td className="fw-600">{l.crop_name}</td>
+                          <td>{l.available_kg?.toLocaleString()} kg</td>
+                          <td className="fw-600 text-primary">₨ {l.price_per_kg}/kg</td>
+                          <td>
+                            <span className={`status-badge ${l.jit_status === 'Harvest Triggered' ? 'status-confirmed' : 'status-awaiting'}`}>
+                              {l.jit_status}
+                            </span>
+                          </td>
+                          <td>{l.harvest_date}</td>
+                          <td><button className="btn btn-ghost btn-sm">Edit</button></td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
+          )}
 
-            {[
-              { name: 'Big Onion', icon: '🧅', qty: '2,500 kg', price: '₨ 210/kg', status: 'Awaiting Order', statusColor: 'badge-amber', harvest: 'Jul 10, 2026' },
-              { name: 'Capsicum', icon: '🫑', qty: '600 kg', price: '₨ 320/kg', status: 'Harvest Triggered', statusColor: 'badge-green', harvest: 'Jul 8, 2026' },
-            ].map((listing, i) => (
-              <div key={listing.name} className="card" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
-                <div style={{ fontSize: 36 }}>{listing.icon}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 6 }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}>{listing.name}</h3>
-                    <span className={`badge ${listing.statusColor}`}>{listing.status}</span>
+
+          {activeTab === 'settings' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Settings</h1>
+              <p className="dash-page-date">Account preferences and configuration</p>
+
+              <div className="dash-info-card dash-settings-card">
+                <h3 className="dash-settings-title">Profile</h3>
+                {[
+                  ['Full Name', currentUser ? currentUser.name : 'Loading...'],
+                  ['Email', currentUser ? currentUser.email : 'Loading...'],
+                  ['Region', currentUser ? currentUser.district : 'Loading...'],
+                  ['Role', currentUser ? currentUser.role : 'Farmer'],
+                  ['JIT Status', 'Active — Verified'],
+                ].map(([k, v]) => (
+                  <div key={k} className="dash-settings-row">
+                    <span className="dash-settings-key">{k}</span>
+                    <span className="dash-settings-value">{v}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-6)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-                    <span>Qty: <strong style={{ color: 'var(--text-primary)' }}>{listing.qty}</strong></span>
-                    <span>Price: <strong style={{ color: 'var(--agro-green-light)' }}>{listing.price}</strong></span>
-                    <span>Harvest: <strong style={{ color: 'var(--text-primary)' }}>{listing.harvest}</strong></span>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-                  <button id={`listing-edit-${i}`} className="btn btn-outline btn-sm">Edit</button>
-                  <button id={`listing-view-${i}`} className="btn btn-ghost btn-sm">View</button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
