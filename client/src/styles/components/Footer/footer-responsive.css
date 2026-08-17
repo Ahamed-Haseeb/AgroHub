@@ -1,11 +1,11 @@
 /* Tablet */
 @media (max-width: 1024px) {
-  .footer {
-    padding: 40px 0 24px;
+  .footer-main {
+    flex-wrap: wrap;
+    gap: 24px;
   }
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+  .footer-nav {
+    gap: 20px;
   }
 }
 
@@ -14,16 +14,22 @@
   .footer {
     padding: 32px 0 20px;
   }
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .footer-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
   }
   .footer-brand-desc {
     max-width: 100%;
   }
+  .footer-nav {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
   .footer-bottom {
     flex-direction: column;
     align-items: center;
+    gap: 8px;
     text-align: center;
   }
 }
@@ -31,7 +37,7 @@
 /* Small mobile */
 @media (max-width: 480px) {
   .footer-socials {
-    gap: 6px;
+    gap: 4px;
   }
   .footer-social-icon {
     width: 30px;
