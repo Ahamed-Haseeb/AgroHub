@@ -37,7 +37,7 @@ orderSchema.pre('validate', function (next) {
   if (!this.order_number) {
     this.order_number = 'AGH-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
   }
-  next();
+  if (typeof next === 'function') next();
 });
 
 export default mongoose.model('Order', orderSchema);

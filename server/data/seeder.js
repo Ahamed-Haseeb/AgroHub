@@ -9,6 +9,7 @@ import CropAdvisory from "../models/Advisory.js";
 import PlatformStat from "../models/Stat.js";
 import MarketPrice from "../models/MarketPrice.js";
 import Traceability from "../models/Traceability.js";
+import User from "../models/User.js";
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ const cropListings = [
   {
     listing_id: "LST001",
     crop_name: "Big Onion",
-    farmer_name: "Suresh Perera",
+    farmer_name: "Hanfal",
     origin: "Dambulla, North Central",
     district: "Matale",
     quantity_kg: 2500,
@@ -37,7 +38,7 @@ const cropListings = [
   {
     listing_id: "LST002",
     crop_name: "Tomato (Cherry)",
-    farmer_name: "Dilani Rathnayake",
+    farmer_name: "Hanfal",
     origin: "Nuwara Eliya, Central",
     district: "Nuwara Eliya",
     quantity_kg: 800,
@@ -57,7 +58,7 @@ const cropListings = [
   {
     listing_id: "LST003",
     crop_name: "Carrot",
-    farmer_name: "Nimal Bandara",
+    farmer_name: "Haseeb Masboob",
     origin: "Nuwara Eliya, Central",
     district: "Nuwara Eliya",
     quantity_kg: 1200,
@@ -77,7 +78,7 @@ const cropListings = [
   {
     listing_id: "LST004",
     crop_name: "Capsicum",
-    farmer_name: "Priya Kumari",
+    farmer_name: "Haseeb Masboob",
     origin: "Dambulla, North Central",
     district: "Matale",
     quantity_kg: 600,
@@ -248,6 +249,8 @@ const traceabilitySteps = [
 const importData = async () => {
   try {
     await connectDB();
+    const mongoose = (await import('mongoose')).default;
+    const User = mongoose.model('User');
 
     await CropListing.deleteMany();
     await Order.deleteMany();
@@ -257,8 +260,87 @@ const importData = async () => {
     await MarketPrice.deleteMany();
     await Traceability.deleteMany();
 
-    await CropListing.insertMany(cropListings);
-    await Order.insertMany(orders);
+    const insertedCrops = await CropListing.insertMany(cropListings);
+    
+    // Find a buyer (or fallback to a random ObjectId if no users exist)
+    let buyer = await User.findOne({ email: 'haseeb@gmail.com' });
+    if (!buyer) buyer = await User.findOne();
+    const buyerId = buyer ? buyer._id : new mongoose.Types.ObjectId();
+
+    // Map the old dummy orders to the new valid Mongoose Schema structure
+    const validOrders = [
+      {
+        order_number: "ORD-1023",
+        buyer: buyerId,
+        items: [{
+          crop: insertedCrops.find(c => c.listing_id === 'LST001')._id,
+          listing_id: 'LST001',
+          crop_name: 'Big Onion',
+          farmer_name: 'Hanfal',
+          quantity_kg: 500,
+          price_per_kg: 210,
+          subtotal: 105000
+        }],
+        total_amount: 105000,
+        payment: { method: 'card', status: 'paid' },
+        delivery: { district: 'Colombo', phone: '0771234567' },
+        status: 'Processing'
+      },
+      {
+        order_number: "ORD-1022",
+        buyer: buyerId,
+        items: [{
+          crop: insertedCrops.find(c => c.listing_id === 'LST002')._id,
+          listing_id: 'LST002',
+          crop_name: 'Tomato (Cherry)',
+          farmer_name: 'Hanfal',
+          quantity_kg: 200,
+          price_per_kg: 185,
+          subtotal: 37000
+        }],
+        total_amount: 37000,
+        payment: { method: 'card', status: 'paid' },
+        delivery: { district: 'Colombo', phone: '0771234567' },
+        status: 'Shipped'
+      },
+      // New orders for Haseeb Masboob
+      {
+        order_number: "ORD-2001",
+        buyer: buyerId,
+        items: [{
+          crop: insertedCrops.find(c => c.listing_id === 'LST003')._id,
+          listing_id: 'LST003',
+          crop_name: 'Carrot',
+          farmer_name: 'Haseeb Masboob',
+          quantity_kg: 300,
+          price_per_kg: 145,
+          subtotal: 43500
+        }],
+        total_amount: 43500,
+        payment: { method: 'bank_transfer', status: 'paid' },
+        delivery: { district: 'Kandy', phone: '0719876543' },
+        status: 'Pending'
+      },
+      {
+        order_number: "ORD-2002",
+        buyer: buyerId,
+        items: [{
+          crop: insertedCrops.find(c => c.listing_id === 'LST004')._id,
+          listing_id: 'LST004',
+          crop_name: 'Capsicum',
+          farmer_name: 'Haseeb Masboob',
+          quantity_kg: 150,
+          price_per_kg: 320,
+          subtotal: 48000
+        }],
+        total_amount: 48000,
+        payment: { method: 'card', status: 'paid' },
+        delivery: { district: 'Galle', phone: '0719876543' },
+        status: 'Confirmed'
+      }
+    ];
+
+    await Order.insertMany(validOrders);
     await HarvestAlert.insertMany(harvestAlerts);
     await CropAdvisory.insertMany(cropAdvisory);
     await PlatformStat.insertMany(platformStats);
@@ -267,7 +349,7 @@ const importData = async () => {
 
     console.log('Data seeded:');
     console.log(`  ${cropListings.length} crop listings`);
-    console.log(`  ${orders.length} orders`);
+    console.log(`  ${validOrders.length} orders (Valid schema with ObjectIds)`);
     console.log(`  ${harvestAlerts.length} harvest alerts`);
     console.log(`  ${cropAdvisory.length} crop advisories`);
     console.log(`  ${platformStats.length} platform stats`);
