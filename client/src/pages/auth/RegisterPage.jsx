@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { registerUser } from '../../api/client';
 import { registerBrandStats } from '../../config/brandStats';
+import toast from 'react-hot-toast';
 
 const districts = [
   'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo',
@@ -80,6 +81,7 @@ export default function RegisterPage() {
       localStorage.setItem('agrohub_token', data.token);
       localStorage.setItem('agrohub_user', JSON.stringify(data.user));
 
+      toast.success('Registration successful!');
       if (data.user.role === 'farmer') {
         navigate('/farmer');
       } else {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Leaf, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { loginUser } from '../../api/client';
 import { brandStats } from '../../config/brandStats';
+import toast from 'react-hot-toast';
 
 import { useAuth } from '../../context/AuthContext';
 
@@ -29,6 +30,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login({ ...form, remember });
+      toast.success('Successfully logged in!');
       if (user.role === 'farmer') {
         navigate('/farmer');
       } else {

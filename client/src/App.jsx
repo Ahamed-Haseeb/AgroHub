@@ -54,7 +54,7 @@ export default function App() {
           </Routes>
 
           <Toaster
-            position="top-right"
+            position="bottom-right"
             toastOptions={{
               style: {
                 background: 'var(--bg-white)',
@@ -65,6 +65,7 @@ export default function App() {
                 fontSize: '14px',
                 boxShadow: 'var(--shadow-lg)',
               },
+              duration:10000,
             }}
           />
         </BrowserRouter>

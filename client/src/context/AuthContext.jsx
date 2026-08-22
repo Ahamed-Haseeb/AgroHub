@@ -47,7 +47,12 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.removeItem('agrohub_user');
       localStorage.removeItem('token');
       
-      toast.success('Logged out successfully');
+      toast.success('Logged out successfully', { duration: 3000 });
+      setTimeout(() => {
+        if (window.location.pathname.includes('/farmer') || window.location.pathname.includes('/buyer')) {
+          window.location.href = '/login';
+        }
+      }, 300);
     }
   };
 

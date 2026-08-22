@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const CartContext = createContext();
 
@@ -47,9 +48,17 @@ export function CartProvider({ children }) {
   }, [cart]);
 
   const addItem = (item) => dispatch({ type: 'ADD_ITEM', payload: item });
-  const removeItem = (id) => dispatch({ type: 'REMOVE_ITEM', payload: id });
-  const updateQty = (id, qty) => dispatch({ type: 'UPDATE_QTY', payload: { id, qty } });
-  const clearCart = () => dispatch({ type: 'CLEAR_CART' });
+  const removeItem = (id) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: id });
+    toast.success('Item removed from cart');
+  };
+  const updateQty = (id, qty) => {
+    dispatch({ type: 'UPDATE_QTY', payload: { id, qty } });
+  };
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+    toast.success('Cart cleared');
+  };
 
   const cartTotal = cart.reduce((total, item) => total + (item.price_per_kg * item.quantity_kg), 0);
   const cartCount = cart.length;
