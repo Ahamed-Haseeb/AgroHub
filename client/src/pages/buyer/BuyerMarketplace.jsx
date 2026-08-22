@@ -1,16 +1,121 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend
+  AreaChart, Area, XAxis, YAxis,
+  Tooltip, ResponsiveContainer
 } from 'recharts';
 import {
-  Search, Filter, ShoppingCart, MapPin, Star,
-  Package, Truck, Clock, CheckCircle, ArrowRight,
-  TrendingUp, Leaf, ChevronDown, X, ShieldCheck
+  Package, Clock, CheckCircle, Truck, MapPin,
+  ShoppingCart, TrendingUp, LogOut, LayoutDashboard,
+  ClipboardList, Settings, Leaf, Menu, ArrowRight,
+  Eye, ChevronDown, ChevronUp, ShieldCheck
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchCrops, fetchPrediction, fetchTraceability, fetchMyOrders } from '../../api/client';
+import { fetchMyOrders, fetchTraceability, fetchPrediction } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
+const getInitials = (name) => {
+  const parts = (name || '').split(' ');
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (name || '??').substring(0, 2).toUpperCase();
+};
+
+const STATUS_FLOW = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered'];
+const STATUS_ICONS = {
+  Pending: Clock,
+  Confirmed: CheckCircle,
+  Processing: Package,
+  Shipped: Truck,
+  Delivered: CheckCircle,
+  Cancelled: Clock,
+};
+
+function StatusStepper({ current }) {
+  const idx = STATUS_FLOW.indexOf(current);
+  return (
+    <div className="buyer-dash-stepper">
+      {STATUS_FLOW.map((step, i) => {
+        const Icon = STATUS_ICONS[step];
+        const done = i < idx;
+        const active = i === idx;
+        return (
+          <div key={step} className={`stepper-step ${done ? 'done' : ''} ${active ? 'active' : ''}`}>
+            <div className={`stepper-dot ${done ? 'done' : ''} ${active ? 'active' : ''}`}>
+              {done ? <CheckCircle size={12} /> : <Icon size={12} />}
+            </div>
+            <span className="stepper-label">{step}</span>
+            {i < STATUS_FLOW.length - 1 && <div className={`stepper-line ${done ? 'done' : ''}`} />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function OrderDetailPanel({ order }) {
+  const [showTrace, setShowTrace] = useState(false);
+
+  const { data: traceSteps = [] } = useQuery({
+    queryKey: ['traceability', order._id],
+    queryFn: () => fetchTraceability(order._id),
+    enabled: showTrace,
+  });
+
+  return (
+    <div className="buyer-dash-order-detail animate-fade-in">
+      <StatusStepper current={order.status} />
+
+      <div className="buyer-dash-order-items">
+        {order.items?.map((item, i) => (
+          <div key={i} className="buyer-dash-order-item">
+            <div className="buyer-dash-item-info">
+              <div className="fw-600">{item.crop_name}</div>
+              <div className="text-muted" style={{ fontSize: 12 }}>{item.farmer_name}</div>
+            </div>
+            <div className="buyer-dash-item-nums">
+              <span>{item.quantity_kg} kg × ₨ {item.price_per_kg}</span>
+              <span className="fw-600">₨ {item.subtotal?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="buyer-dash-order-meta">
+        <span>Payment: {order.payment?.method?.replace('_', ' ')}</span>
+        <span>Delivery: {order.delivery?.district}</span>
+        {order.delivery?.phone && <span>Phone: {order.delivery.phone}</span>}
+      </div>
+
+      <button
+        className="btn btn-outline btn-sm"
+        onClick={() => setShowTrace(!showTrace)}
+        style={{ marginTop: 'var(--sp-3)' }}
+      >
+        <MapPin size={14} /> {showTrace ? 'Hide' : 'Show'} Traceability
+      </button>
+
+      {showTrace && traceSteps.length > 0 && (
+        <div className="buyer-dash-trace animate-fade-in">
+          {traceSteps.map((step, i) => {
+            const isActive = !step.done && (i === 0 || traceSteps[i - 1].done);
+            return (
+              <div key={i} className="buyer-dash-trace-step">
+                <div className={`timeline-dot ${step.done ? 'done' : isActive ? 'active' : ''}`}>
+                  {step.done && <CheckCircle size={8} color="#fff" />}
+                </div>
+                <div style={{ opacity: step.done || isActive ? 1 : 0.4 }}>
+                  <div className="fw-600" style={{ fontSize: 13 }}>{step.step}</div>
+                  <div className="text-muted" style={{ fontSize: 11 }}>{step.date} · {step.location}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PriceTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -26,445 +131,306 @@ function PriceTooltip({ active, payload, label }) {
   );
 }
 
+const sidebarItems = [
+  { id: 'orders', label: 'My Orders', icon: <ClipboardList size={18} /> },
+  { id: 'tracking', label: 'Tracking', icon: <Truck size={18} /> },
+  { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
+];
 
-function ProductCard({ listing, onSelect }) {
-  const jitColors = {
-    'Harvest Triggered': { badge: 'badge-green', dot: 'var(--agro-green)' },
-    'Awaiting Order':    { badge: 'badge-amber', dot: 'var(--agro-amber)' },
-  };
-  const statusStyle = jitColors[listing.jit_status] || { badge: 'badge-muted', dot: 'var(--text-muted)' };
+export default function BuyerDashboard() {
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('orders');
+  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  return (
-    <div className="product-card" onClick={() => onSelect(listing)} id={`product-${listing.id}`}>
+  const { data: myOrders = [], isLoading } = useQuery({
+    queryKey: ['myOrders'],
+    queryFn: fetchMyOrders,
+    enabled: !!user,
+  });
 
-      <div className="product-card-top-row">
-        <span className={`badge ${statusStyle.badge}`}>
-          <span className="status-dot" style={{ background: statusStyle.dot }} />
-          {listing.jit_status}
-        </span>
-        {listing.organic && <span className="badge badge-green"><Leaf size={12} className="badge-icon-inline" /> Organic</span>}
-      </div>
+  const { data: prediction } = useQuery({
+    queryKey: ['prediction', 'ONION_BIG_LK'],
+    queryFn: () => fetchPrediction('ONION_BIG_LK'),
+  });
 
+  const filteredOrders = statusFilter === 'all'
+    ? myOrders
+    : myOrders.filter(o => o.status === statusFilter);
 
-      <div className="product-emoji">{listing.icon}</div>
+  const totalSpent = myOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const pendingCount = myOrders.filter(o => o.status === 'Pending' || o.status === 'Confirmed').length;
+  const shippedCount = myOrders.filter(o => o.status === 'Shipped').length;
+  const deliveredCount = myOrders.filter(o => o.status === 'Delivered').length;
 
-
-      <h3 className="product-card-title">{listing.crop_name}</h3>
-
-      <div className="product-card-origin">
-        <MapPin size={11} />
-        {listing.origin}
-      </div>
-
-
-      <div className="product-card-rating-row">
-        <div className="product-card-stars">
-          {[1,2,3,4,5].map(s => (
-            <Star key={s} size={11} fill={s <= Math.floor(listing.rating) ? '#f59e0b' : 'none'} color="#f59e0b" />
-          ))}
-        </div>
-        <span className="product-card-rating-text">{listing.rating} ({listing.orders} orders)</span>
-      </div>
-
-
-      <div className="product-card-price-row">
-        <div>
-          <div className="product-price">₨ {listing.price_per_kg}</div>
-          <div className="product-unit">per kg</div>
-        </div>
-        <div className="product-card-avail-col">
-          <div className="product-card-avail-qty">
-            {listing.available_kg.toLocaleString()} kg
-          </div>
-          <div className="product-card-avail-label">available</div>
-        </div>
-      </div>
-
-
-      <div className="product-card-footer-row">
-        <div className="product-card-delivery-col">
-          <Truck size={11} />
-          {listing.delivery_days}d delivery
-        </div>
-        <span className="badge badge-muted">{listing.grade}</span>
-      </div>
-    </div>
+  // orders in transit = not pending, not delivered, not cancelled
+  const inTransitOrders = myOrders.filter(o =>
+    ['Confirmed', 'Processing', 'Shipped'].includes(o.status)
   );
-}
-
-
-function OrderModal({ listing, onClose }) {
-  const [qty, setQty] = useState(50);
-  if (!listing) return null;
-
-  const total = qty * listing.price_per_kg;
 
   return (
-    <div className="order-modal-overlay">
-      <div className="order-modal-content">
-
-        <div className="order-modal-header">
-          <div>
-            <div className="order-modal-title-row">
-              <span className="order-modal-icon">{listing.icon}</span>
-              <h2 className="order-modal-title">
-                {listing.crop_name}
-              </h2>
-            </div>
-            <div className="order-modal-subtitle">
-              <MapPin size={12} />
-              {listing.origin} · Farmer: {listing.farmer_name}
-            </div>
-          </div>
-          <button id="order-modal-close" onClick={onClose} className="btn btn-ghost order-modal-close-btn">
-            <X size={20} />
-          </button>
-        </div>
-
-
-        <div className="buyer-modal-grid">
-          {[
-            ['Grade', listing.grade],
-            ['Packaging', listing.packaging],
-            ['Delivery', `${listing.delivery_days} days`],
-          ].map(([k, v]) => (
-            <div key={k} className="order-modal-grid-item">
-              <div className="order-modal-grid-label">{k}</div>
-              <div className="order-modal-grid-val">{v}</div>
-            </div>
-          ))}
-        </div>
-
-
-        <div className="order-qty-section">
-          <label className="order-qty-label">
-            Order Quantity (kg)
-          </label>
-          <div className="order-qty-controls">
-            <button id="order-qty-minus" className="btn btn-outline btn-sm" onClick={() => setQty(q => Math.max(10, q - 10))}>−</button>
-            <input
-              id="order-qty-input"
-              type="number"
-              className="input order-qty-input"
-              value={qty}
-              onChange={e => setQty(Math.max(10, Math.min(listing.available_kg, +e.target.value)))}
-            />
-            <button id="order-qty-plus" className="btn btn-outline btn-sm" onClick={() => setQty(q => Math.min(listing.available_kg, q + 10))}>+</button>
-          </div>
-          <p className="order-qty-hint">
-            Max available: {listing.available_kg.toLocaleString()} kg
-          </p>
-        </div>
-
-
-        <div className="order-total-panel">
-          <div>
-            <div className="order-total-label">Order Total</div>
-            <div className="order-total-val">
-              ₨ {total.toLocaleString('en-LK')}
-            </div>
-          </div>
-          <div className="order-total-calc">
-            <div>{qty} kg × ₨ {listing.price_per_kg}</div>
-            <div>Harvest: {new Date(listing.harvest_date).toLocaleDateString('en-LK', { month: 'short', day: 'numeric' })}</div>
-          </div>
-        </div>
-
-
-        <div className="order-trust-panel">
-          <CheckCircle size={16} className="order-trust-icon" />
-          <div>
-            <div className="order-trust-title">JIT Harvest Alert</div>
-            <div className="order-trust-desc">
-              This advance payment triggers the farmer's JIT Harvest Alert.
-            </div>
-          </div>
-        </div>
-
-
-        <button id="order-place-btn" className="btn btn-primary btn-lg order-place-btn">
-          Place Advance Order - ₨ {total.toLocaleString('en-LK')}
+    <>
+      <div className="dash-mobile-header">
+        <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Leaf size={18} /> AgroHub
+        </Link>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="dash-mobile-menu-btn">
+          <Menu size={20} />
         </button>
       </div>
-    </div>
-  );
-}
 
+      <div className="dashboard-layout">
+        <aside className={`dashboard-sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
+          <Link to="/" className="sidebar-logo" style={{ textDecoration: 'none' }}>
+            <Leaf size={20} color="var(--bg-white)" />
+            AgroHub
+          </Link>
 
-function TraceabilityPanel({ steps = [] }) {
-  if (!steps.length) return null;
-  return (
-    <div className="chart-container chart-container-fit">
-      <div className="chart-title chart-title-spaced"><MapPin size={16} className="badge-icon-inline" /> Order Traceability</div>
-      <div className="chart-subtitle">Big Onion · Order #ALERT001</div>
-      <div className="timeline timeline-spaced">
-        {steps.map((step, i) => {
-          const isActive = !step.done && (i === 0 || steps[i - 1].done);
-          return (
-            <div key={step.step} className="timeline-item">
-              <div className={`timeline-dot ${step.done ? 'done' : isActive ? 'active' : ''}`}>
-                {step.done && <CheckCircle size={8} color="#fff" className="timeline-icon-check" />}
-              </div>
-              <div style={{
-                opacity: step.done || isActive ? 1 : 0.45,
-                transition: 'var(--transition-base)'
-              }}>
-                <div className="timeline-content-flex">
-                  <span className={`timeline-status ${step.done ? 'text-green' : isActive ? 'text-amber' : ''}`}>
-                    {step.step}
-                  </span>
-                  {isActive && <span className="badge badge-amber timeline-badge-next">Next</span>}
-                </div>
-                <div className="timeline-time">
-                  {step.date} · {step.location}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="timeline-desc">
-        Updates automatically via farmer's mobile app.
-      </div>
-    </div>
-  );
-}
-
-
-const categories = ['All', 'Vegetables', 'Root Crops', 'Fruits', 'Organic'];
-
-export default function BuyerMarketplace() {
-  const [search,        setSearch]        = useState('');
-  const [activeCategory, setCategory]    = useState('All');
-  const [sortBy,        setSortBy]        = useState('default');
-  const [selectedItem,  setSelectedItem]  = useState(null);
-  const [cartCount,     setCartCount]     = useState(0);
-
-  const { data: cropListings = [] } = useQuery({ queryKey: ['crops'], queryFn: fetchCrops });
-  const { data: prediction } = useQuery({ queryKey: ['prediction', 'ONION_BIG_LK'], queryFn: () => fetchPrediction('ONION_BIG_LK') });
-  const { data: traceabilitySteps = [] } = useQuery({ queryKey: ['traceability', 'ALERT001'], queryFn: () => fetchTraceability('ALERT001') });
-  const { data: myOrders = [] } = useQuery({ queryKey: ['myOrders'], queryFn: fetchMyOrders });
-
-  const filtered = cropListings
-    .filter(l =>
-      (activeCategory === 'All' || l.category === activeCategory || (activeCategory === 'Organic' && l.organic)) &&
-      (search === '' || l.crop_name.toLowerCase().includes(search.toLowerCase()) || l.origin.toLowerCase().includes(search.toLowerCase()))
-    )
-    .sort((a, b) =>
-      sortBy === 'price-asc'  ? a.price_per_kg - b.price_per_kg :
-      sortBy === 'price-desc' ? b.price_per_kg - a.price_per_kg :
-      sortBy === 'qty'        ? b.available_kg - a.available_kg : 0
-    );
-
-  return (
-    <div className="buyer-page">
-
-      <div className="buyer-hero">
-        <div className="container">
-          <div className="buyer-hero-header">
-            <div>
-              <div className="hero-eyebrow buyer-hero-eyebrow">
-                <ShoppingCart size={18} className="buyer-hero-icon" /> D2C Marketplace
-              </div>
-              <h1 className="buyer-hero-title">
-                Fresh From the{' '}
-                <span className="gradient-text">Farm</span>
-              </h1>
-              <p className="buyer-hero-desc">
-                Farm-to-doorstep in 24–72 hours. No intermediaries. No markup chains.
-              </p>
-            </div>
-
-            <button id="buyer-cart-btn" className="btn btn-primary buyer-cart-btn">
-              <ShoppingCart size={18} />
-              Cart
-              {cartCount > 0 && (
-                <span className="buyer-cart-badge">{cartCount}</span>
-              )}
-            </button>
-          </div>
-
-
-          <div className="buyer-controls">
-
-            <div className="buyer-search-wrap">
-              <Search size={15} color="var(--text-muted)" className="buyer-search-icon" />
-              <input
-                id="marketplace-search"
-                className="input buyer-search-input"
-                placeholder="Search crops, origin, farmer..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-
-            <select
-              id="marketplace-sort"
-              className="input select buyer-sort-select"
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-            >
-              <option value="default">Sort: Default</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
-              <option value="qty">Most Available</option>
-            </select>
-          </div>
-
-
-          <div className="chip-row buyer-chips">
-            {categories.map(cat => (
+          <div className="sidebar-nav">
+            {sidebarItems.map(item => (
               <button
-                key={cat}
-                id={`cat-chip-${cat.toLowerCase().replace(' ', '-')}`}
-                className={`chip ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setCategory(cat)}
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
               >
-                {cat}
+                {item.icon}
+                {item.label}
               </button>
             ))}
           </div>
-        </div>
-      </div>
 
+          <Link to="/" className="sidebar-nav-item sidebar-shop-link">
+            <ShoppingCart size={18} />
+            Shop Now
+            {cartCount > 0 && <span className="sidebar-cart-count">{cartCount}</span>}
+          </Link>
 
-      <div className="container buyer-content">
-        <div className="buyer-layout-grid">
+          <div className="sidebar-user">
+            <div className="sidebar-avatar">{user ? getInitials(user.name) : '??'}</div>
+            <div>
+              <div className="sidebar-user-name">{user?.name || 'Loading...'}</div>
+              <div className="sidebar-user-role">{user?.role || 'Buyer'}</div>
+            </div>
+          </div>
 
+          <button className="sidebar-logout" onClick={() => {
+            logout();
+            window.location.href = '/login';
+          }}>
+            <LogOut size={16} />
+            Log out
+          </button>
+        </aside>
 
-          <div>
+        <main className="dashboard-main">
 
-            <div className="buyer-listings-header">
-              <p className="buyer-listings-count">
-                <strong>{filtered.length}</strong> listings found
-              </p>
-              <div className="buyer-filter-badges">
-                {['Harvest Triggered', 'Organic'].map(filter => (
-                  filtered.some(l => l.jit_status === filter || (filter === 'Organic' && l.organic)) &&
-                  <span key={filter} className={`badge ${filter === 'Harvest Triggered' ? 'badge-green' : 'badge-muted'}`}>
-                    {filter}
-                  </span>
+          {/* -- Orders Tab -- */}
+          {activeTab === 'orders' && (
+            <div className="animate-fade-in">
+              <div className="dash-header">
+                <div>
+                  <h1 className="dash-page-title">My Orders</h1>
+                  <p className="dash-page-date">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+                <button className="btn btn-primary" onClick={() => navigate('/')}>
+                  <ShoppingCart size={16} /> Shop Now
+                </button>
+              </div>
+
+              <div className="dash-metric-grid" style={{ marginBottom: 'var(--sp-6)' }}>
+                {[
+                  { label: 'Total Spent', value: `₨ ${totalSpent.toLocaleString('en-LK', { minimumFractionDigits: 2 })}` },
+                  { label: 'Total Orders', value: myOrders.length },
+                  { label: 'In Transit', value: pendingCount + shippedCount },
+                  { label: 'Delivered', value: deliveredCount },
+                ].map(m => (
+                  <div key={m.label} className="dash-metric-card">
+                    <div className="dash-metric-label">{m.label}</div>
+                    <div className="dash-metric-value">{m.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="buyer-dash-filter-row">
+                {['all', 'Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered'].map(s => (
+                  <button
+                    key={s}
+                    className={`chip ${statusFilter === s ? 'active' : ''}`}
+                    onClick={() => setStatusFilter(s)}
+                  >
+                    {s === 'all' ? 'All Orders' : s}
+                    {s !== 'all' && (
+                      <span className="chip-count">
+                        {myOrders.filter(o => o.status === s).length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {isLoading ? (
+                <div style={{ padding: 'var(--sp-10)', textAlign: 'center', color: 'var(--text-muted)' }}>Loading orders...</div>
+              ) : filteredOrders.length === 0 ? (
+                <div className="buyer-dash-empty">
+                  <Package size={48} strokeWidth={1} color="var(--border)" />
+                  <p>No orders found.</p>
+                  <Link to="/" className="btn btn-primary">Browse Products</Link>
+                </div>
+              ) : (
+                <div className="buyer-dash-orders-list">
+                  {filteredOrders.map(order => (
+                    <div key={order._id} className="buyer-dash-order-card">
+                      <div
+                        className="buyer-dash-order-header"
+                        onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                      >
+                        <div>
+                          <div className="buyer-dash-order-num">{order.order_number}</div>
+                          <div className="buyer-dash-order-date">
+                            <Clock size={12} />
+                            {new Date(order.createdAt).toLocaleDateString('en-LK', {
+                              year: 'numeric', month: 'short', day: 'numeric'
+                            })}
+                            <span className="buyer-dash-items-count">
+                              · {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="buyer-dash-order-right">
+                          <span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span>
+                          <div className="buyer-dash-order-total">
+                            ₨ {order.total_amount?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                          </div>
+                          {expandedOrder === order._id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </div>
+                      </div>
+
+                      {expandedOrder === order._id && <OrderDetailPanel order={order} />}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* -- Tracking Tab -- */}
+          {activeTab === 'tracking' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Order Tracking</h1>
+              <p className="dash-page-date">Orders currently in transit</p>
+
+              {inTransitOrders.length === 0 ? (
+                <div className="buyer-dash-empty">
+                  <Truck size={48} strokeWidth={1} color="var(--border)" />
+                  <p>No orders in transit right now.</p>
+                </div>
+              ) : (
+                <div className="buyer-dash-orders-list">
+                  {inTransitOrders.map(order => (
+                    <div key={order._id} className="buyer-dash-order-card">
+                      <div className="buyer-dash-order-header" style={{ cursor: 'default' }}>
+                        <div>
+                          <div className="buyer-dash-order-num">{order.order_number}</div>
+                          <div className="buyer-dash-order-date">
+                            <Clock size={12} />
+                            {new Date(order.createdAt).toLocaleDateString('en-LK', {
+                              year: 'numeric', month: 'short', day: 'numeric'
+                            })}
+                          </div>
+                        </div>
+                        <div className="buyer-dash-order-right">
+                          <span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span>
+                          <div className="buyer-dash-order-total">
+                            ₨ {order.total_amount?.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                      </div>
+                      <OrderDetailPanel order={order} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="buyer-dash-sidebar-cards">
+                <div className="chart-container">
+                  <div className="chart-title">
+                    <TrendingUp size={14} className="chart-icon" />
+                    Big Onion - Price Trend
+                  </div>
+                  <div className="chart-subtitle-small">SARIMA 12-week forecast</div>
+                  <ResponsiveContainer width="100%" height={130}>
+                    {prediction ? (
+                      <AreaChart data={prediction.forecast.slice(0, 12)} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="buyerPriceGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="week_label" tick={{ fill: '#6b8f6b', fontSize: 9 }} axisLine={false} tickLine={false} interval={2} />
+                        <YAxis tick={{ fill: '#6b8f6b', fontSize: 9 }} axisLine={false} tickLine={false} />
+                        <Tooltip content={<PriceTooltip />} />
+                        <Area type="monotone" dataKey="price" name="₨/kg" stroke="#22c55e" strokeWidth={1.5} fill="url(#buyerPriceGrad)" />
+                      </AreaChart>
+                    ) : (
+                      <div style={{ height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 12 }}>Loading...</div>
+                    )}
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="card buyer-direct-card">
+                  <h4 className="buyer-direct-title">
+                    <ShieldCheck size={18} className="buyer-direct-icon" /> Why Buy Direct?
+                  </h4>
+                  {[
+                    ['Fresh harvest guarantee', '24–72hr'],
+                    ['Full traceability', 'Farm to door'],
+                    ['Fair to farmers', '+42% gain'],
+                    ['Zero hidden fees', 'Direct pricing'],
+                  ].map(([a, b]) => (
+                    <div key={a} className="buyer-direct-row">
+                      <span className="buyer-direct-label">
+                        <CheckCircle size={11} color="var(--primary)" className="buyer-direct-check" />
+                        {a}
+                      </span>
+                      <span className="buyer-direct-value">{b}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* -- Settings Tab -- */}
+          {activeTab === 'settings' && (
+            <div className="animate-fade-in">
+              <h1 className="dash-page-title">Settings</h1>
+              <p className="dash-page-date">Account preferences</p>
+
+              <div className="dash-info-card dash-settings-card">
+                <h3 className="dash-settings-title">Profile</h3>
+                {[
+                  ['Full Name', user?.name || 'Loading...'],
+                  ['Email', user?.email || 'Loading...'],
+                  ['District', user?.district || 'Not set'],
+                  ['Role', user?.role || 'Buyer'],
+                  ['Phone', user?.phone || 'Not set'],
+                ].map(([k, v]) => (
+                  <div key={k} className="dash-settings-row">
+                    <span className="dash-settings-key">{k}</span>
+                    <span className="dash-settings-value">{v}</span>
+                  </div>
                 ))}
               </div>
             </div>
-
-
-            <div className="buyer-product-grid">
-              {filtered.map((listing, i) => (
-                <ProductCard
-                  key={listing.id}
-                  listing={listing}
-                  onSelect={(l) => { setSelectedItem(l); setCartCount(c => c + 1); }}
-                />
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="buyer-empty">
-                <div className="buyer-empty-icon">
-                  <Search size={48} strokeWidth={1} color="var(--border-default)" />
-                </div>
-                <p>No listings found for "{search}"</p>
-              </div>
-            )}
-          </div>
-
-
-          <div className="buyer-sidebar">
-
-            <div className="chart-container">
-              <div className="chart-title">
-                <TrendingUp size={14} className="chart-icon" />
-                Big Onion - Price Trend
-              </div>
-              <div className="chart-subtitle-small">
-                SARIMA 12-week forecast
-              </div>
-              <ResponsiveContainer width="100%" height={130}>
-                {prediction ? (
-                <AreaChart
-                  data={prediction.forecast.slice(0, 12)}
-                  margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="buyerPriceGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#16a34a" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="week_label" tick={{ fill: '#6b8f6b', fontSize: 9 }} axisLine={false} tickLine={false} interval={2} />
-                  <YAxis tick={{ fill: '#6b8f6b', fontSize: 9 }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<PriceTooltip />} />
-                  <Area type="monotone" dataKey="price" name="₨/kg" stroke="#22c55e" strokeWidth={1.5} fill="url(#buyerPriceGrad)" />
-                </AreaChart>
-                ) : (
-                  <div className="buyer-chart-loading">Loading forecast...</div>
-                )}
-              </ResponsiveContainer>
-              <div className="buyer-chart-meta">
-                <span>Current: <strong className="buyer-chart-highlight">₨ {prediction?.forecast?.[0]?.price ?? '-'}</strong></span>
-                <span>12-wk avg: <strong className="buyer-chart-highlight-primary">₨ {prediction ? Math.round(prediction.forecast.slice(0, 12).reduce((s, w) => s + w.price, 0) / 12) : '-'}</strong></span>
-              </div>
-            </div>
-
-
-            <TraceabilityPanel steps={traceabilitySteps} />
-
-
-            <div className="card buyer-direct-card">
-              <h4 className="buyer-direct-title">
-                <ShieldCheck size={18} className="buyer-direct-icon" /> Why Buy Direct?
-              </h4>
-              {[
-                ['Fresh harvest guarantee', '24–72hr delivery'],
-                ['Full traceability',       'Farm to doorstep'],
-                ['Fair to farmers',         '+42% price gain'],
-                ['Zero hidden fees',        'Direct pricing'],
-              ].map(([a, b]) => (
-                <div key={a} className="buyer-direct-row">
-                  <span className="buyer-direct-label">
-                    <CheckCircle size={11} color="var(--agro-green-light)" className="buyer-direct-check" />
-                    {a}
-                  </span>
-                  <span className="buyer-direct-value">{b}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          )}
+        </main>
       </div>
-
-
-      {selectedItem && (
-        <OrderModal listing={selectedItem} onClose={() => setSelectedItem(null)} />
-      )}
-
-      {myOrders.length > 0 && (
-        <div className="buyer-section">
-          <div className="buyer-section-header">
-            <h2 className="buyer-section-title"><Package size={20} /> My Orders</h2>
-          </div>
-          <div className="orders-card">
-            <table className="orders-table">
-              <thead>
-                <tr><th>Order #</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr>
-              </thead>
-              <tbody>
-                {myOrders.map(order => (
-                  <tr key={order._id}>
-                    <td className="fw-600">{order.order_number}</td>
-                    <td>{order.items?.map(i => `${i.crop_name} (${i.quantity_kg}kg)`).join(', ')}</td>
-                    <td className="fw-600">₨{order.total_amount?.toFixed(2)}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{order.payment?.method?.replace('_', ' ')}</td>
-                    <td><span className={`status-badge status-${order.status?.toLowerCase()}`}>{order.status}</span></td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }

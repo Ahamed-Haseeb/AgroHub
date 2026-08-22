@@ -58,9 +58,9 @@ export default function CheckoutPage() {
       };
 
       const result = await createOrder(orderData);
-      clearCart();
       toast.success('Order placed!');
       navigate(`/order-confirmation/${result._id}`);
+      setTimeout(() => clearCart(), 100);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to place order');
     } finally {

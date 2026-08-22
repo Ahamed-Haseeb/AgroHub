@@ -37,3 +37,6 @@
 
 @import "./components/Product/product.css";
 @import "./components/Cart/cart.css";
+
+@import "./components/BuyerMarketplace/buyer-marketplace.css";
+@import "./components/BuyerMarketplace/buyer-marketplace-responsive.css";
