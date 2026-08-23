@@ -12,6 +12,7 @@ import {
   fetchCrops, updateOrderStatus
 } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 import OverviewTab from './tabs/OverviewTab';
 import AdvisorTab from './tabs/AdvisorTab';
@@ -92,6 +93,16 @@ export default function FarmerDashboard() {
   });
   const myListings = allCrops.filter(c => c.farmer_name === currentUser?.name);
 
+  const wrappedUpdateOrderStatus = async (id, status) => {
+    try {
+      await updateOrderStatus(id, status);
+      toast.success(`Order status updated to ${status}`);
+    } catch (err) {
+      toast.error('Failed to update order status');
+      throw err;
+    }
+  };
+
   return (
     <>
       <div className="dash-mobile-header">
@@ -147,7 +158,7 @@ export default function FarmerDashboard() {
               prediction={prediction}
               activeOrders={activeOrders}
               myListings={myListings}
-              updateOrderStatus={updateOrderStatus}
+              updateOrderStatus={wrappedUpdateOrderStatus}
               refetchOrders={refetchOrders}
             />
           )}
@@ -172,7 +183,7 @@ export default function FarmerDashboard() {
             <OrdersTab 
               harvestAlerts={harvestAlerts}
               activeOrders={activeOrders}
-              updateOrderStatus={updateOrderStatus}
+              updateOrderStatus={wrappedUpdateOrderStatus}
               refetchOrders={refetchOrders}
             />
           )}

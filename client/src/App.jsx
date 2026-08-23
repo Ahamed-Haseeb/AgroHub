@@ -12,6 +12,8 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 
+import NotFoundPage from './pages/NotFoundPage';
+
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -46,6 +48,7 @@ export default function App() {
                     <Route path="/" element={<Storefront />} />
                     <Route path="/product/:id" element={<ProductPage />} />
                     <Route path="/cart" element={<CartPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                   <Footer />
                 </>
